@@ -1,0 +1,28 @@
+<div class="chart-container">
+  <div *ngIf="!chartReady" class="no-data">
+    <mat-icon>show_chart</mat-icon>
+    <p>Select an asset to view sensor readings</p>
+  </div>
+
+  <div *ngIf="chartReady" class="chart-wrapper">
+    <div class="chart-header">
+      <div class="chart-title">
+        <mat-icon>sensors</mat-icon>
+        <span>{{ selectedAssetName }} — Sensor Readings</span>
+        <span class="reading-count">{{ readings.length }} data points</span>
+      </div>
+      <div class="threshold-badges">
+        <span class="threshold-badge rms">RMS max: {{ rmsMax }} g</span>
+        <span class="threshold-badge temp">Temp max: {{ tempMax }}°C</span>
+        <span class="threshold-badge breach">● Breach</span>
+      </div>
+    </div>
+    <div class="canvas-wrapper">
+      <canvas baseChart
+              [data]="chartData"
+              [options]="chartOptions"
+              type="line">
+      </canvas>
+    </div>
+  </div>
+</div>

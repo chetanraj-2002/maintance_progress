@@ -1,0 +1,92 @@
+<div class="home-root">
+
+  <!-- Nav -->
+  <nav class="home-nav">
+    <div class="nav-brand">
+      <mat-icon class="nav-logo-icon">precision_manufacturing</mat-icon>
+      <span class="nav-logo-text">PredictiveMaint</span>
+      <span class="nav-logo-sub">LITE</span>
+    </div>
+    <div class="nav-actions">
+      <button mat-button (click)="goToLogin()">Sign In</button>
+      <button mat-raised-button color="primary" (click)="goToRegister()">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">
+      <mat-icon>bolt</mat-icon> Industrial IoT Dashboard
+    </div>
+    <h1 class="hero-title">
+      Predict Failures.<br>
+      <span class="hero-accent">Before They Happen.</span>
+    </h1>
+    <p class="hero-desc">
+      Monitor vibration and temperature across your entire industrial asset fleet.
+      Get real-time alerts, auto-generated maintenance tickets, and actionable insights — all in one place.
+    </p>
+    <div class="hero-actions">
+      <button mat-raised-button color="primary" class="hero-btn-primary" (click)="goToDashboard()">
+        <mat-icon>dashboard</mat-icon> Open Dashboard
+      </button>
+      <button mat-stroked-button color="primary" class="hero-btn-secondary" (click)="goToRegister()">
+        Create Account
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-number">5</span>
+        <span class="stat-label">Assets Monitored</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-number">300+</span>
+        <span class="stat-label">Sensor Readings</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-number">Real-time</span>
+        <span class="stat-label">Threshold Alerts</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h2 class="section-title">Everything You Need</h2>
+    <p class="section-sub">A complete suite for predictive maintenance management</p>
+    <div class="features-grid">
+      <mat-card class="feature-card" *ngFor="let f of features">
+        <div class="feature-icon-wrap">
+          <mat-icon class="feature-icon">{{ f.icon }}</mat-icon>
+        </div>
+        <h3 class="feature-title">{{ f.title }}</h3>
+        <p class="feature-desc">{{ f.desc }}</p>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta-card">
+      <h2 class="cta-title">Ready to get started?</h2>
+      <p class="cta-desc">Jump into the dashboard and start monitoring your assets now. No setup required.</p>
+      <button mat-raised-button color="primary" class="cta-btn" (click)="goToDashboard()">
+        <mat-icon>arrow_forward</mat-icon> Open Dashboard
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="home-footer">
+    <span>© 2024 PredictiveMaint Lite — Industrial IoT</span>
+    <div class="footer-links">
+      <a (click)="goToLogin()">Login</a>
+      <a (click)="goToRegister()">Register</a>
+      <a (click)="goToDashboard()">Dashboard</a>
+    </div>
+  </footer>
+
+</div>

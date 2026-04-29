@@ -1,0 +1,68 @@
+.threshold-form-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  color: #4a5568;
+  gap: 10px;
+}
+
+.no-selection mat-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  opacity: 0.4;
+}
+
+.no-selection p {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 0.85rem;
+  margin: 0;
+  text-align: center;
+}
+
+.threshold-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.field-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-right: 6px;
+}
+
+.rms-icon { color: #63b3ed; }
+.temp-icon { color: #68d391; }
+
+.save-btn {
+  width: 100%;
+  height: 44px;
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}

@@ -1,0 +1,222 @@
+.ticket-panel-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.section-label {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #4a5568;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.open-counts-section {
+  margin-bottom: 12px;
+}
+
+.counts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.count-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 3px 10px 3px 8px;
+}
+
+.count-asset {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: #a0aec0;
+}
+
+.count-badge {
+  background: #fc8181;
+  color: #1a0505;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.tickets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+.ticket-total {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: #4a5568;
+  background: rgba(255,255,255,0.04);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.tickets-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.tickets-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tickets-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tickets-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+
+.no-tickets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: #4a5568;
+  gap: 8px;
+}
+
+.no-tickets mat-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: #68d391;
+  opacity: 0.5;
+}
+
+.no-tickets p {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.ticket-card {
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.2s;
+}
+
+.ticket-card:hover {
+  border-color: rgba(255,255,255,0.12);
+}
+
+.ticket-open {
+  background: rgba(252, 129, 129, 0.06);
+  border-left: 3px solid rgba(252, 129, 129, 0.5);
+}
+
+.ticket-closed {
+  background: rgba(104, 211, 145, 0.04);
+  border-left: 3px solid rgba(104, 211, 145, 0.3);
+}
+
+.ticket-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ticket-icon-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ticket-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.icon-warn { color: #fc8181; }
+.icon-ok   { color: #68d391; }
+
+.ticket-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ticket-asset {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.ticket-issue {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+.status-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.open-badge {
+  background: rgba(252, 129, 129, 0.2);
+  color: #fc8181;
+  border: 1px solid rgba(252, 129, 129, 0.4);
+}
+
+.closed-badge {
+  background: rgba(104, 211, 145, 0.15);
+  color: #68d391;
+  border: 1px solid rgba(104, 211, 145, 0.3);
+}
+
+.ticket-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  color: #4a5568;
+}
+
+.date-icon {
+  font-size: 0.85rem;
+  width: 0.85rem;
+  height: 0.85rem;
+}

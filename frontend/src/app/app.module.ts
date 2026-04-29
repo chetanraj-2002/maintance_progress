@@ -1,0 +1,86 @@
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+// Angular Material
+import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+// ng2-charts v6
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
+
+// Routing
+import { AppRoutingModule } from './app-routing.module';
+
+// Components
+import { AppComponent } from './app.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { HomeComponent } from './pages/home/home.component';
+import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { AssetListComponent } from './components/asset-list/asset-list.component';
+import { ReadingChartComponent } from './components/reading-chart/reading-chart.component';
+import { ThresholdFormComponent } from './components/threshold-form/threshold-form.component';
+import { TicketPanelComponent } from './components/ticket-panel/ticket-panel.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DashboardComponent,
+    HomeComponent,
+    LoginComponent,
+    RegisterComponent,
+    AssetListComponent,
+    ReadingChartComponent,
+    ThresholdFormComponent,
+    TicketPanelComponent
+  ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    FormsModule,
+    AppRoutingModule,
+    // Material
+    MatTableModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatListModule,
+    MatDividerModule,
+    MatToolbarModule,
+    MatBadgeModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    // ng2-charts v6
+    BaseChartDirective
+  ],
+  providers: [
+    provideCharts(withDefaultRegisterables())
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}

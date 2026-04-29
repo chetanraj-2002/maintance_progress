@@ -1,0 +1,69 @@
+<div class="auth-root">
+  <div class="auth-left">
+    <div class="auth-brand" (click)="goToHome()">
+      <mat-icon class="auth-brand-icon">precision_manufacturing</mat-icon>
+      <span class="auth-brand-name">PredictiveMaint</span>
+      <span class="auth-brand-sub">LITE</span>
+    </div>
+    <div class="auth-left-content">
+      <h2 class="auth-left-title">Monitor. Predict. Maintain.</h2>
+      <p class="auth-left-desc">
+        The intelligent dashboard for industrial asset health monitoring.
+        Keep your operations running smoothly.
+      </p>
+      <div class="auth-left-features">
+        <div class="auth-feature" *ngFor="let f of features">
+          <mat-icon class="auth-feature-icon">{{ f.icon }}</mat-icon>
+          <span>{{ f.text }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to your account to continue</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Email address</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" placeholder="you@company.com" autocomplete="email">
+          <mat-error *ngIf="email.hasError('required')">Email is required</mat-error>
+          <mat-error *ngIf="email.hasError('email')">Please enter a valid email</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Password</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password">
+          <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword" [attr.aria-label]="'Toggle password'">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="password.hasError('required')">Password is required</mat-error>
+          <mat-error *ngIf="password.hasError('minlength')">At least 6 characters required</mat-error>
+        </mat-form-field>
+
+        <div class="auth-options">
+          <a class="auth-link forgot-link" href="#">Forgot password?</a>
+        </div>
+
+        <button mat-raised-button color="primary" type="submit" class="auth-submit-btn" [disabled]="loading">
+          <mat-spinner *ngIf="loading" diameter="20" class="btn-spinner"></mat-spinner>
+          <span *ngIf="!loading"><mat-icon>login</mat-icon> Sign In</span>
+          <span *ngIf="loading">Signing in…</span>
+        </button>
+
+      </form>
+
+      <div class="auth-footer">
+        <span>Don't have an account?</span>
+        <a class="auth-link" (click)="goToRegister()">Create one for free</a>
+      </div>
+    </div>
+  </div>
+</div>

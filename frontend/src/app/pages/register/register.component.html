@@ -1,0 +1,99 @@
+<div class="auth-root">
+  <div class="auth-left">
+    <div class="auth-brand" (click)="goToHome()">
+      <mat-icon class="auth-brand-icon">precision_manufacturing</mat-icon>
+      <span class="auth-brand-name">PredictiveMaint</span>
+      <span class="auth-brand-sub">LITE</span>
+    </div>
+    <div class="auth-left-content">
+      <h2 class="auth-left-title">Start monitoring in minutes.</h2>
+      <p class="auth-left-desc">
+        Create your free account and gain full access to the predictive maintenance dashboard.
+        No credit card required.
+      </p>
+      <div class="register-benefits">
+        <div class="benefit">
+          <mat-icon class="benefit-check">check_circle</mat-icon>
+          <span>Real-time vibration &amp; temperature monitoring</span>
+        </div>
+        <div class="benefit">
+          <mat-icon class="benefit-check">check_circle</mat-icon>
+          <span>Automated maintenance ticket creation</span>
+        </div>
+        <div class="benefit">
+          <mat-icon class="benefit-check">check_circle</mat-icon>
+          <span>Per-asset configurable thresholds</span>
+        </div>
+        <div class="benefit">
+          <mat-icon class="benefit-check">check_circle</mat-icon>
+          <span>Historical trend charts with date filtering</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">Get started with PredictiveMaint Lite for free</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Full Name</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput formControlName="fullName" placeholder="John Smith" autocomplete="name">
+          <mat-error *ngIf="fullName.hasError('required')">Full name is required</mat-error>
+          <mat-error *ngIf="fullName.hasError('minlength')">At least 2 characters required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Email address</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email" placeholder="you@company.com" autocomplete="email">
+          <mat-error *ngIf="email.hasError('required')">Email is required</mat-error>
+          <mat-error *ngIf="email.hasError('email')">Please enter a valid email</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Password</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="new-password">
+          <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint>Minimum 8 characters</mat-hint>
+          <mat-error *ngIf="password.hasError('required')">Password is required</mat-error>
+          <mat-error *ngIf="password.hasError('minlength')">At least 8 characters required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Confirm Password</mat-label>
+          <mat-icon matPrefix>lock_outline</mat-icon>
+          <input matInput [type]="showConfirm ? 'text' : 'password'" formControlName="confirmPassword" autocomplete="new-password">
+          <button mat-icon-button matSuffix type="button" (click)="showConfirm = !showConfirm">
+            <mat-icon>{{ showConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="confirmPassword.hasError('required')">Please confirm your password</mat-error>
+          <mat-error *ngIf="form.hasError('passwordMismatch') && !confirmPassword.hasError('required')">
+            Passwords do not match
+          </mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="auth-submit-btn" [disabled]="loading">
+          <mat-spinner *ngIf="loading" diameter="20" class="btn-spinner"></mat-spinner>
+          <span *ngIf="!loading"><mat-icon>person_add</mat-icon> Create Account</span>
+          <span *ngIf="loading">Creating account…</span>
+        </button>
+
+      </form>
+
+      <div class="auth-footer">
+        <span>Already have an account?</span>
+        <a class="auth-link" (click)="goToLogin()">Sign in instead</a>
+      </div>
+    </div>
+  </div>
+</div>

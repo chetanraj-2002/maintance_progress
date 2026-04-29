@@ -1,0 +1,144 @@
+<!-- Toolbar -->
+<mat-toolbar class="dash-toolbar">
+  <div class="toolbar-brand" (click)="goHome()">
+    <mat-icon class="brand-icon">precision_manufacturing</mat-icon>
+    <div class="brand-text">
+      <span class="brand-title">PredictiveMaint</span>
+      <span class="brand-sub">LITE — Industrial IoT Dashboard</span>
+    </div>
+  </div>
+  <div class="toolbar-spacer"></div>
+  <div class="toolbar-status">
+    <div class="status-chip healthy">
+      <span class="status-dot"></span>
+      {{ assets.length }} Assets Online
+    </div>
+    <div class="status-chip alert" *ngIf="openCounts.length > 0">
+      <span class="status-dot"></span>
+      {{ openCounts.length }} Assets w/ Open Tickets
+    </div>
+  </div>
+</mat-toolbar>
+
+<!-- Main Layout -->
+<div class="dashboard-root">
+
+  <!-- Top 3-Column Grid -->
+  <div class="top-grid">
+
+    <!-- Column 1: Asset List -->
+    <mat-card class="dash-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="card-icon">list_alt</mat-icon>
+        <mat-card-title>Assets</mat-card-title>
+        <mat-card-subtitle>{{ assets.length }} monitored assets</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="loadingAssets" class="loading-wrap">
+          <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+        </div>
+        <app-asset-list
+          *ngIf="!loadingAssets"
+          [assets]="assets"
+          [selectedAssetId]="selectedAsset?.id ?? null"
+          (assetSelected)="onAssetSelected($event)">
+        </app-asset-list>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Column 2: Threshold Form -->
+    <mat-card class="dash-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="card-icon">tune</mat-icon>
+        <mat-card-title>Thresholds</mat-card-title>
+        <mat-card-subtitle>{{ selectedAsset ? selectedAsset.assetName : 'No asset selected' }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <app-threshold-form
+          [threshold]="threshold"
+          [selectedAssetId]="selectedAsset?.id ?? null"
+          (thresholdUpdated)="onThresholdUpdated($event)">
+        </app-threshold-form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Column 3: Ticket Panel -->
+    <mat-card class="dash-card ticket-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="card-icon">confirmation_number</mat-icon>
+        <mat-card-title>Maintenance Tickets</mat-card-title>
+        <mat-card-subtitle>{{ tickets.length }} total &nbsp;|&nbsp; Open on {{ openCounts.length }} assets</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="ticket-card-content">
+        <app-ticket-panel [tickets]="tickets" [openCounts]="openCounts"></app-ticket-panel>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- Date Range Filter — FIX: uses cdkOverlayOrigin to ensure popup anchors to field -->
+  <mat-card class="dash-card filter-card" *ngIf="selectedAsset">
+    <mat-card-content class="filter-content">
+      <div class="filter-label">
+        <mat-icon>date_range</mat-icon>
+        <span>Filter Readings for <strong>{{ selectedAsset.assetName }}</strong></span>
+      </div>
+
+      <div class="date-pickers">
+        <!-- FIX: panelClass + xPosition/yPosition fix positioning -->
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate" placeholder="MM/DD/YYYY">
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker [panelClass]="'datepicker-panel'" xPosition="start" yPosition="below"></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" placeholder="MM/DD/YYYY">
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker [panelClass]="'datepicker-panel'" xPosition="start" yPosition="below"></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="applyDateFilter()" class="filter-btn">
+          <mat-icon>filter_alt</mat-icon> Apply Filter
+        </button>
+
+        <button mat-stroked-button (click)="clearDateFilter()" class="clear-btn">
+          <mat-icon>clear</mat-icon> Clear
+        </button>
+      </div>
+
+      <div class="reading-info" *ngIf="readings.length > 0">
+        <mat-icon>info_outline</mat-icon>
+        Showing {{ readings.length }} readings
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Chart Section -->
+  <mat-card class="dash-card chart-section-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar class="card-icon">show_chart</mat-icon>
+      <mat-card-title>Sensor Readings Chart</mat-card-title>
+      <mat-card-subtitle>
+        <span *ngIf="selectedAsset">RMS &amp; Temperature over time — {{ selectedAsset.assetName }}</span>
+        <span *ngIf="!selectedAsset">Select an asset to view chart</span>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="chart-card-content">
+      <div *ngIf="loadingReadings" class="loading-wrap">
+        <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
+        <span>Loading sensor data…</span>
+      </div>
+      <app-reading-chart
+        *ngIf="!loadingReadings"
+        [readings]="readings"
+        [selectedAssetName]="selectedAsset ? selectedAsset.assetName : ''"
+        [rmsMax]="rmsMax"
+        [tempMax]="tempMax">
+      </app-reading-chart>
+    </mat-card-content>
+  </mat-card>
+
+</div>

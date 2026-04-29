@@ -1,0 +1,48 @@
+<div class="ticket-panel-container">
+
+  <!-- Open Counts Summary -->
+  <div class="open-counts-section" *ngIf="openCounts.length > 0">
+    <div class="section-label">Open Tickets by Asset</div>
+    <div class="counts-grid">
+      <div *ngFor="let oc of openCounts" class="count-chip">
+        <span class="count-asset">{{ oc.assetName }}</span>
+        <span class="count-badge">{{ oc.openCount }}</span>
+      </div>
+    </div>
+    <mat-divider></mat-divider>
+  </div>
+
+  <!-- Recent Tickets List -->
+  <div class="tickets-header">
+    <span class="section-label">Recent Tickets</span>
+    <span class="ticket-total">{{ tickets.length }} total</span>
+  </div>
+
+  <div class="tickets-scroll">
+    <div *ngIf="tickets.length === 0" class="no-tickets">
+      <mat-icon>check_circle_outline</mat-icon>
+      <p>No maintenance tickets</p>
+    </div>
+
+    <div *ngFor="let ticket of recentTickets" class="ticket-card" [class.ticket-open]="ticket.status === 'OPEN'" [class.ticket-closed]="ticket.status === 'CLOSED'">
+      <div class="ticket-top">
+        <div class="ticket-icon-title">
+          <mat-icon class="ticket-icon" [class.icon-warn]="ticket.status === 'OPEN'" [class.icon-ok]="ticket.status === 'CLOSED'">
+            {{ getIssueIcon(ticket.issueType) }}
+          </mat-icon>
+          <div class="ticket-info">
+            <span class="ticket-asset">{{ ticket.asset.assetName }}</span>
+            <span class="ticket-issue">{{ formatIssueType(ticket.issueType) }}</span>
+          </div>
+        </div>
+        <span class="status-badge" [class.open-badge]="ticket.status === 'OPEN'" [class.closed-badge]="ticket.status === 'CLOSED'">
+          {{ ticket.status }}
+        </span>
+      </div>
+      <div class="ticket-date">
+        <mat-icon class="date-icon">schedule</mat-icon>
+        {{ formatDate(ticket.createdAt) }}
+      </div>
+    </div>
+  </div>
+</div>
