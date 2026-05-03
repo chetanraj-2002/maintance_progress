@@ -2,15 +2,12 @@
   <div class="auth-left">
     <div class="auth-brand" (click)="goToHome()">
       <mat-icon class="auth-brand-icon">precision_manufacturing</mat-icon>
-      <span class="auth-brand-name">PredictiveMaint</span>
+      <span class="auth-brand-name">PredictiveMaintenance</span>
       <span class="auth-brand-sub">LITE</span>
     </div>
     <div class="auth-left-content">
       <h2 class="auth-left-title">Monitor. Predict. Maintain.</h2>
-      <p class="auth-left-desc">
-        The intelligent dashboard for industrial asset health monitoring.
-        Keep your operations running smoothly.
-      </p>
+      <p class="auth-left-desc">The intelligent dashboard for industrial asset health monitoring. Keep your operations running smoothly.</p>
       <div class="auth-left-features">
         <div class="auth-feature" *ngFor="let f of features">
           <mat-icon class="auth-feature-icon">{{ f.icon }}</mat-icon>
@@ -41,19 +38,18 @@
           <mat-label>Password</mat-label>
           <mat-icon matPrefix>lock</mat-icon>
           <input matInput [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password">
-          <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword" [attr.aria-label]="'Toggle password'">
+          <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword">
             <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           <mat-error *ngIf="password.hasError('required')">Password is required</mat-error>
-          <mat-error *ngIf="password.hasError('minlength')">At least 6 characters required</mat-error>
         </mat-form-field>
 
         <div class="auth-options">
-          <a class="auth-link forgot-link" href="#">Forgot password?</a>
+          <a class="auth-link forgot-link" (click)="goToForgotPassword()">Forgot password?</a>
         </div>
 
         <button mat-raised-button color="primary" type="submit" class="auth-submit-btn" [disabled]="loading">
-          <mat-spinner *ngIf="loading" diameter="20" class="btn-spinner"></mat-spinner>
+          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
           <span *ngIf="!loading"><mat-icon>login</mat-icon> Sign In</span>
           <span *ngIf="loading">Signing in…</span>
         </button>

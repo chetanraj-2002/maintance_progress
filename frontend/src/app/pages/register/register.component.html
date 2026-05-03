@@ -2,32 +2,17 @@
   <div class="auth-left">
     <div class="auth-brand" (click)="goToHome()">
       <mat-icon class="auth-brand-icon">precision_manufacturing</mat-icon>
-      <span class="auth-brand-name">PredictiveMaint</span>
+      <span class="auth-brand-name">PredictiveMaintenance</span>
       <span class="auth-brand-sub">LITE</span>
     </div>
     <div class="auth-left-content">
       <h2 class="auth-left-title">Start monitoring in minutes.</h2>
-      <p class="auth-left-desc">
-        Create your free account and gain full access to the predictive maintenance dashboard.
-        No credit card required.
-      </p>
+      <p class="auth-left-desc">Create your free account and gain full access to the predictive maintenance dashboard. No credit card required.</p>
       <div class="register-benefits">
-        <div class="benefit">
-          <mat-icon class="benefit-check">check_circle</mat-icon>
-          <span>Real-time vibration &amp; temperature monitoring</span>
-        </div>
-        <div class="benefit">
-          <mat-icon class="benefit-check">check_circle</mat-icon>
-          <span>Automated maintenance ticket creation</span>
-        </div>
-        <div class="benefit">
-          <mat-icon class="benefit-check">check_circle</mat-icon>
-          <span>Per-asset configurable thresholds</span>
-        </div>
-        <div class="benefit">
-          <mat-icon class="benefit-check">check_circle</mat-icon>
-          <span>Historical trend charts with date filtering</span>
-        </div>
+        <div class="benefit"><mat-icon class="benefit-check">check_circle</mat-icon><span>Real-time vibration &amp; temperature monitoring</span></div>
+        <div class="benefit"><mat-icon class="benefit-check">check_circle</mat-icon><span>Automated maintenance ticket creation</span></div>
+        <div class="benefit"><mat-icon class="benefit-check">check_circle</mat-icon><span>Per-asset configurable thresholds</span></div>
+        <div class="benefit"><mat-icon class="benefit-check">check_circle</mat-icon><span>Historical trend charts with date filtering</span></div>
       </div>
     </div>
   </div>
@@ -54,7 +39,16 @@
           <mat-icon matPrefix>email</mat-icon>
           <input matInput type="email" formControlName="email" placeholder="you@company.com" autocomplete="email">
           <mat-error *ngIf="email.hasError('required')">Email is required</mat-error>
-          <mat-error *ngIf="email.hasError('email')">Please enter a valid email</mat-error>
+          <mat-error *ngIf="email.hasError('email')">Please enter a valid email address</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="auth-field">
+          <mat-label>Phone Number</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput type="tel" formControlName="phone" placeholder="+91 98765 43210" autocomplete="tel">
+          <mat-hint>Include country code, e.g. +91 98765 43210</mat-hint>
+          <mat-error *ngIf="phone.hasError('required')">Phone number is required</mat-error>
+          <mat-error *ngIf="phone.hasError('invalidPhone')">Enter a valid phone number (7–15 digits)</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="auth-field">
@@ -64,10 +58,27 @@
           <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword">
             <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          <mat-hint>Minimum 8 characters</mat-hint>
-          <mat-error *ngIf="password.hasError('required')">Password is required</mat-error>
-          <mat-error *ngIf="password.hasError('minlength')">At least 8 characters required</mat-error>
         </mat-form-field>
+
+        <!-- Live password strength checklist -->
+        <div class="pwd-checklist" *ngIf="password.dirty || password.touched">
+          <div class="pwd-rule" [class.ok]="hasMinLength()">
+            <mat-icon>{{ hasMinLength() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            At least 8 characters
+          </div>
+          <div class="pwd-rule" [class.ok]="hasUppercase()">
+            <mat-icon>{{ hasUppercase() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            At least one uppercase letter (A–Z)
+          </div>
+          <div class="pwd-rule" [class.ok]="hasNumber()">
+            <mat-icon>{{ hasNumber() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            At least one number (0–9)
+          </div>
+          <div class="pwd-rule" [class.ok]="hasSpecial()">
+            <mat-icon>{{ hasSpecial() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            At least one special character (!&#64;#$…)
+          </div>
+        </div>
 
         <mat-form-field appearance="outline" class="auth-field">
           <mat-label>Confirm Password</mat-label>
@@ -77,13 +88,11 @@
             <mat-icon>{{ showConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
           <mat-error *ngIf="confirmPassword.hasError('required')">Please confirm your password</mat-error>
-          <mat-error *ngIf="form.hasError('passwordMismatch') && !confirmPassword.hasError('required')">
-            Passwords do not match
-          </mat-error>
+          <mat-error *ngIf="form.hasError('passwordMismatch') && !confirmPassword.hasError('required')">Passwords do not match</mat-error>
         </mat-form-field>
 
         <button mat-raised-button color="primary" type="submit" class="auth-submit-btn" [disabled]="loading">
-          <mat-spinner *ngIf="loading" diameter="20" class="btn-spinner"></mat-spinner>
+          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
           <span *ngIf="!loading"><mat-icon>person_add</mat-icon> Create Account</span>
           <span *ngIf="loading">Creating account…</span>
         </button>

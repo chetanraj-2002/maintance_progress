@@ -9,11 +9,9 @@ export class AssetService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Asset[]> {
-    return this.http.get<Asset[]>(this.baseUrl);
-  }
-
-  getById(id: number): Observable<Asset> {
-    return this.http.get<Asset>(`${this.baseUrl}/${id}`);
-  }
+  getAll():                     Observable<Asset[]>   { return this.http.get<Asset[]>(this.baseUrl); }
+  getById(id: number):          Observable<Asset>     { return this.http.get<Asset>(`${this.baseUrl}/${id}`); }
+  create(asset: Asset):         Observable<Asset>     { return this.http.post<Asset>(this.baseUrl, asset); }
+  update(id: number, a: Asset): Observable<Asset>     { return this.http.put<Asset>(`${this.baseUrl}/${id}`, a); }
+  delete(id: number):           Observable<void>      { return this.http.delete<void>(`${this.baseUrl}/${id}`); }
 }
