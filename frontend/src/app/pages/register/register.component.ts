@@ -47,6 +47,7 @@ export class RegisterComponent {
       fullName:        ['', [Validators.required, Validators.minLength(2)]],
       email:           ['', [Validators.required, Validators.email]],
       phone:           ['', [Validators.required, phoneValidator]],
+      role:            ['USER', Validators.required],
       password:        ['', [Validators.required, strongPasswordValidator]],
       confirmPassword: ['', Validators.required]
     }, { validators: passwordMatchValidator });
@@ -56,8 +57,8 @@ export class RegisterComponent {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
     setTimeout(() => {
-      const { fullName, email, phone, password } = this.form.value;
-      const result = this.auth.register(fullName, email, phone, password);
+      const { fullName, email, phone, password, role } = this.form.value;
+      const result = this.auth.register(fullName, email, phone, password, role);
       this.loading = false;
       if (result.ok) {
         this.snack.open('Account created! Redirecting to dashboard…', '', { duration: 2500, panelClass: ['snack-success'] });
@@ -74,6 +75,7 @@ export class RegisterComponent {
   get fullName()        { return this.form.get('fullName')!; }
   get email()           { return this.form.get('email')!; }
   get phone()           { return this.form.get('phone')!; }
+  get role()            { return this.form.get('role')!; }
   get password()        { return this.form.get('password')!; }
   get confirmPassword() { return this.form.get('confirmPassword')!; }
 

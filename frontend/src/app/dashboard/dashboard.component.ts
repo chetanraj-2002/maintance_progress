@@ -177,6 +177,8 @@ export class DashboardComponent implements OnInit {
   get rmsMax():  number { return this.threshold?.rmsMax  ?? 10; }
   get tempMax(): number { return this.threshold?.tempMax ?? 80; }
   get userName(): string { return this.auth.currentUser?.fullName ?? 'User'; }
+  get userRole(): string { return this.auth.currentUser?.role === 'ADMIN' ? 'Admin' : 'Viewer'; }
+  get canManageAssets(): boolean { return this.auth.isAdmin; }
   get addName()  { return this.addAssetForm.get('assetName')!; }
   get addLoc()   { return this.addAssetForm.get('location')!; }
 }

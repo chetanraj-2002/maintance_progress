@@ -4,6 +4,11 @@
     <p>Select an asset to configure thresholds</p>
   </div>
 
+  <div *ngIf="selectedAssetId != null && readonly" class="no-selection">
+    <mat-icon>visibility</mat-icon>
+    <p>Viewer access: thresholds are read-only</p>
+  </div>
+
   <form *ngIf="selectedAssetId != null" [formGroup]="form" (ngSubmit)="save()" class="threshold-form">
     <div class="form-field-group">
       <mat-form-field appearance="outline" class="full-width">
@@ -25,7 +30,7 @@
       </mat-form-field>
     </div>
 
-    <button mat-raised-button color="accent" type="submit"
+    <button *ngIf="!readonly" mat-raised-button color="accent" type="submit"
             [disabled]="form.invalid || saving"
             class="save-btn">
       <mat-icon *ngIf="!saving">save</mat-icon>

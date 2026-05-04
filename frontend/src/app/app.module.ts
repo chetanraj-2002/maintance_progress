@@ -23,6 +23,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 
 // ng2-charts
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
@@ -67,7 +68,7 @@ import { TicketPanelComponent } from './components/ticket-panel/ticket-panel.com
     MatButtonModule, MatIconModule, MatDatepickerModule, MatNativeDateModule,
     MatListModule, MatDividerModule, MatToolbarModule, MatBadgeModule,
     MatChipsModule, MatProgressSpinnerModule, MatSnackBarModule,
-    MatTooltipModule, MatPaginatorModule, MatDialogModule,
+    MatTooltipModule, MatPaginatorModule, MatDialogModule, MatSelectModule,
     BaseChartDirective
   ],
   providers: [AuthGuard, provideCharts(withDefaultRegisterables())],

@@ -12,6 +12,7 @@ import { Threshold } from '../../models/models';
 export class ThresholdFormComponent implements OnChanges {
   @Input() threshold: Threshold | null = null;
   @Input() selectedAssetId: number | null = null;
+  @Input() readonly = false;
   @Output() thresholdUpdated = new EventEmitter<Threshold>();
 
   form: FormGroup;
@@ -35,10 +36,16 @@ export class ThresholdFormComponent implements OnChanges {
         tempMax: this.threshold.tempMax
       });
     }
+
+    if (this.readonly) {
+      this.form.disable({ emitEvent: false });
+    } else {
+      this.form.enable({ emitEvent: false });
+    }
   }
 
   save(): void {
-    if (this.form.invalid || this.selectedAssetId == null) return;
+    if (this.readonly || this.form.invalid || this.selectedAssetId == null) return;
 
     this.saving = true;
     const payload = {

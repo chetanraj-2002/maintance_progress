@@ -12,7 +12,7 @@
   <div class="toolbar-right">
     <div class="user-chip">
       <mat-icon>account_circle</mat-icon>
-      <span>{{ userName }}</span>
+      <span>{{ userName }} - {{ userRole }}</span>
     </div>
     <button mat-stroked-button class="logout-btn" (click)="logout()">
       <mat-icon>logout</mat-icon> Logout
@@ -52,7 +52,7 @@
         <mat-icon mat-card-avatar class="card-icon">list_alt</mat-icon>
         <mat-card-title>Assets</mat-card-title>
         <mat-card-subtitle>{{ allAssets.length }} monitored assets</mat-card-subtitle>
-        <div class="card-header-action">
+        <div class="card-header-action" *ngIf="canManageAssets">
           <button mat-raised-button color="primary" class="add-btn" (click)="openAddAsset()">
             <mat-icon>add</mat-icon> Add Asset
           </button>
@@ -76,7 +76,7 @@
                 <th>Asset</th>
                 <th>Location</th>
                 <th>Status</th>
-                <th></th>
+                <th *ngIf="canManageAssets"></th>
               </tr>
             </thead>
             <tbody>
@@ -91,7 +91,7 @@
                 </td>
                 <td class="loc-cell">{{ a.location }}</td>
                 <td><span [class]="'status-pill ' + a.status">{{ a.status }}</span></td>
-                <td>
+                <td *ngIf="canManageAssets">
                   <button mat-icon-button class="del-btn"
                     (click)="deleteAsset(a); $event.stopPropagation()"
                     matTooltip="Delete asset">
@@ -126,6 +126,7 @@
         <app-threshold-form
           [threshold]="threshold"
           [selectedAssetId]="selectedAsset?.id ?? null"
+          [readonly]="!canManageAssets"
           (thresholdUpdated)="onThresholdUpdated($event)">
         </app-threshold-form>
       </mat-card-content>
@@ -200,7 +201,7 @@
 </div>
 
 <!-- ══ Add Asset Dialog ══ -->
-<div class="dialog-overlay" *ngIf="showAddAsset" (click)="closeAddAsset()">
+<div class="dialog-overlay" *ngIf="showAddAsset && canManageAssets" (click)="closeAddAsset()">
   <div class="dialog-box" (click)="$event.stopPropagation()">
     <div class="dialog-header">
       <h2 class="dialog-title"><mat-icon>add_box</mat-icon> Add New Asset</h2>

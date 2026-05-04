@@ -30,7 +30,10 @@ public class AssetController {
     }
 
     @PostMapping
-    public ResponseEntity<Asset> createAsset(@RequestBody Asset asset) {
+    public ResponseEntity<Asset> createAsset(
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @RequestBody Asset asset) {
+        requireAdmin(role);
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(maintenanceService.createAsset(asset));
         } catch (IllegalArgumentException ex) {
@@ -39,7 +42,11 @@ public class AssetController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Asset> updateAsset(@PathVariable Long id, @RequestBody Asset asset) {
+    public ResponseEntity<Asset> updateAsset(
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @PathVariable Long id,
+            @RequestBody Asset asset) {
+        requireAdmin(role);
         try {
             return ResponseEntity.ok(maintenanceService.updateAsset(id, asset));
         } catch (IllegalArgumentException ex) {
@@ -50,12 +57,21 @@ public class AssetController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAsset(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAsset(
+            @RequestHeader(value = "X-User-Role", required = false) String role,
+            @PathVariable Long id) {
+        requireAdmin(role);
         try {
             maintenanceService.deleteAsset(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException ex) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    private void requireAdmin(String role) {
+        if (!"ADMIN".equalsIgnoreCase(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
         }
     }
 }

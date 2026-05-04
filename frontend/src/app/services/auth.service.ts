@@ -7,7 +7,10 @@ export interface User {
   fullName: string;
   email: string;
   phone: string;
+  role: UserRole;
 }
+
+export type UserRole = 'ADMIN' | 'USER';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -18,10 +21,12 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(this.loadSession());
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    this.ensureDefaultAccounts();
+  }
 
   // ── Register ─────────────────────────────────────────────
-  register(fullName: string, email: string, phone: string, password: string): { ok: boolean; message: string } {
+  register(fullName: string, email: string, phone: string, password: string, role: UserRole = 'USER'): { ok: boolean; message: string } {
     const users = this.getUsers();
     if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
       return { ok: false, message: 'An account with this email already exists.' };
@@ -30,7 +35,8 @@ export class AuthService {
       id: crypto.randomUUID(),
       fullName,
       email,
-      phone
+      phone,
+      role
     };
     users.push(user);
     // store hashed password alongside (simple sha-like key for demo — replace with real API)
@@ -84,6 +90,7 @@ export class AuthService {
   // ── Helpers ───────────────────────────────────────────────
   get currentUser(): User | null { return this.currentUserSubject.value; }
   get isLoggedIn(): boolean      { return !!this.currentUserSubject.value; }
+  get isAdmin(): boolean         { return this.currentUser?.role === 'ADMIN'; }
 
   // Per-user storage key prefix (so each user has isolated dashboard data)
   userKey(suffix: string): string {
@@ -96,12 +103,47 @@ export class AuthService {
   }
 
   private loadSession(): User | null {
-    try { return JSON.parse(localStorage.getItem(this.SESSION_KEY) ?? 'null'); }
+    try { return this.normalizeUser(JSON.parse(localStorage.getItem(this.SESSION_KEY) ?? 'null')); }
     catch { return null; }
   }
 
   private getUsers(): User[] {
-    try { return JSON.parse(localStorage.getItem(this.USERS_KEY) ?? '[]'); }
+    try {
+      const users = JSON.parse(localStorage.getItem(this.USERS_KEY) ?? '[]');
+      return Array.isArray(users) ? users.map(u => this.normalizeUser(u)).filter(Boolean) as User[] : [];
+    }
     catch { return []; }
+  }
+
+  private ensureDefaultAccounts(): void {
+    const users = this.getUsers();
+    if (users.length > 0) return;
+
+    const admin: User = {
+      id: 'admin-demo',
+      fullName: 'Admin User',
+      email: 'admin@pm.local',
+      phone: '+91 90000 00000',
+      role: 'ADMIN'
+    };
+    const viewer: User = {
+      id: 'viewer-demo',
+      fullName: 'Viewer User',
+      email: 'viewer@pm.local',
+      phone: '+91 90000 00001',
+      role: 'USER'
+    };
+
+    localStorage.setItem(this.USERS_KEY, JSON.stringify([admin, viewer]));
+    localStorage.setItem(`pm_pwd_${admin.id}`, btoa('Admin@123'));
+    localStorage.setItem(`pm_pwd_${viewer.id}`, btoa('Viewer@123'));
+  }
+
+  private normalizeUser(user: User | null): User | null {
+    if (!user) return null;
+    return {
+      ...user,
+      role: user.role ?? 'USER'
+    };
   }
 }
