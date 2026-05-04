@@ -17,4 +17,6 @@ public interface MaintenanceTicketRepository extends JpaRepository<MaintenanceTi
     List<OpenCountDto> findOpenCountsGroupedByAsset();
 
     List<MaintenanceTicket> findAllByOrderByCreatedAtDesc();
+
+    void deleteByAsset_Id(Long assetId);
 }

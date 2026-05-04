@@ -13,4 +13,9 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
 
     @Query("SELECT s FROM Sensor s WHERE s.asset.id = :assetId")
     Optional<Sensor> findByAssetId(@Param("assetId") Long assetId);
+
+    @Query("SELECT COALESCE(MAX(s.id), 0) FROM Sensor s")
+    Long findMaxId();
+
+    void deleteByAsset_Id(Long assetId);
 }

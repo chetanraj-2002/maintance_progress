@@ -26,4 +26,36 @@ public class Threshold {
 
     @Column(name = "temp_max", nullable = false)
     private Double tempMax;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Asset getAsset() {
+        return asset;
+    }
+
+    public void setAsset(Asset asset) {
+        this.asset = asset;
+    }
+
+    public Double getRmsMax() {
+        return rmsMax;
+    }
+
+    public void setRmsMax(Double rmsMax) {
+        this.rmsMax = rmsMax;
+    }
+
+    public Double getTempMax() {
+        return tempMax;
+    }
+
+    public void setTempMax(Double tempMax) {
+        this.tempMax = tempMax;
+    }
 }

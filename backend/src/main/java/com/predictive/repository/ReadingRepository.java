@@ -24,4 +24,6 @@ public interface ReadingRepository extends JpaRepository<Reading, Long> {
 
     @Query("SELECT r FROM Reading r WHERE r.sensor.asset.id = :assetId ORDER BY r.timestamp ASC")
     Page<Reading> findByAssetId(@Param("assetId") Long assetId, Pageable pageable);
+
+    void deleteBySensor_Asset_Id(Long assetId);
 }

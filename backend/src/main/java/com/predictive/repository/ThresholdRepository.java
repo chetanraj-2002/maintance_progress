@@ -15,4 +15,9 @@ public interface ThresholdRepository extends JpaRepository<Threshold, Long> {
     // The correct Spring Data derived query name is findByAsset_Id.
     @Query("SELECT t FROM Threshold t WHERE t.asset.id = :assetId")
     Optional<Threshold> findByAssetId(@Param("assetId") Long assetId);
+
+    @Query("SELECT COALESCE(MAX(t.id), 0) FROM Threshold t")
+    Long findMaxId();
+
+    void deleteByAsset_Id(Long assetId);
 }

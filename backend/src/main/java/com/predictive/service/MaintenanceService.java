@@ -19,6 +19,7 @@ public class MaintenanceService {
     @Autowired private ThresholdRepository thresholdRepository;
     @Autowired private MaintenanceTicketRepository ticketRepository;
     @Autowired private SensorRepository sensorRepository;
+    @Autowired private ReadingRepository readingRepository;
 
     @Transactional
     public void evaluateThresholds(Long assetId, double rms, double temperature) {
@@ -59,6 +60,59 @@ public class MaintenanceService {
 
     public Optional<Asset> getAssetById(Long id) {
         return assetRepository.findById(id);
+    }
+
+    @Transactional
+    public Asset createAsset(Asset request) {
+        Asset asset = new Asset();
+        asset.setAssetName(cleanRequired(request.getAssetName(), "Asset name"));
+        asset.setLocation(cleanRequired(request.getLocation(), "Location"));
+        asset.setStatus(request.getStatus() != null ? request.getStatus() : Asset.AssetStatus.HEALTHY);
+
+        Asset saved = assetRepository.save(asset);
+
+        Sensor sensor = new Sensor();
+        sensor.setId(sensorRepository.findMaxId() + 1);
+        sensor.setAsset(saved);
+        sensor.setSensorType("VIBRATION");
+        sensor.setUnit("g");
+        sensorRepository.save(sensor);
+
+        Threshold threshold = new Threshold();
+        threshold.setId(thresholdRepository.findMaxId() + 1);
+        threshold.setAsset(saved);
+        threshold.setRmsMax(10.0);
+        threshold.setTempMax(80.0);
+        thresholdRepository.save(threshold);
+
+        return saved;
+    }
+
+    @Transactional
+    public Asset updateAsset(Long id, Asset request) {
+        Asset asset = assetRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Asset not found: " + id));
+
+        asset.setAssetName(cleanRequired(request.getAssetName(), "Asset name"));
+        asset.setLocation(cleanRequired(request.getLocation(), "Location"));
+        if (request.getStatus() != null) {
+            asset.setStatus(request.getStatus());
+        }
+
+        return assetRepository.save(asset);
+    }
+
+    @Transactional
+    public void deleteAsset(Long id) {
+        if (!assetRepository.existsById(id)) {
+            throw new RuntimeException("Asset not found: " + id);
+        }
+
+        ticketRepository.deleteByAsset_Id(id);
+        readingRepository.deleteBySensor_Asset_Id(id);
+        thresholdRepository.deleteByAsset_Id(id);
+        sensorRepository.deleteByAsset_Id(id);
+        assetRepository.deleteById(id);
     }
 
     public Optional<Threshold> getThresholdByAssetId(Long assetId) {
@@ -105,5 +159,12 @@ public class MaintenanceService {
         ticket.setStatus(MaintenanceTicket.TicketStatus.OPEN);
         ticket.setCreatedAt(LocalDateTime.now());
         return ticketRepository.save(ticket);
+    }
+
+    private String cleanRequired(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " is required");
+        }
+        return value.trim();
     }
 }

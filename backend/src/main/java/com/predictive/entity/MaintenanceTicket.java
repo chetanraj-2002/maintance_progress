@@ -41,4 +41,44 @@ public class MaintenanceTicket {
     public static final String ISSUE_RMS_OVER  = "RMS_OVER_THRESHOLD";
     public static final String ISSUE_TEMP_OVER = "TEMP_OVER_THRESHOLD";
     public static final String ISSUE_BOTH_OVER = "RMS_AND_TEMP_OVER_THRESHOLD";
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Asset getAsset() {
+        return asset;
+    }
+
+    public void setAsset(Asset asset) {
+        this.asset = asset;
+    }
+
+    public String getIssueType() {
+        return issueType;
+    }
+
+    public void setIssueType(String issueType) {
+        this.issueType = issueType;
+    }
+
+    public TicketStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TicketStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
