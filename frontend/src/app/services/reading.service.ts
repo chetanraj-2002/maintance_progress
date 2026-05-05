@@ -16,4 +16,8 @@ export class ReadingService {
     if (end) params = params.set('end', end);
     return this.http.get<Page<Reading>>(this.baseUrl, { params });
   }
+
+  getRecentReadings(assetId: number): Observable<Reading[]> {
+    return this.http.get<Reading[]>(`${this.baseUrl}/recent/${assetId}`);
+  }
 }

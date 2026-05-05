@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface ReadingRepository extends JpaRepository<Reading, Long> {
@@ -24,6 +25,8 @@ public interface ReadingRepository extends JpaRepository<Reading, Long> {
 
     @Query("SELECT r FROM Reading r WHERE r.sensor.asset.id = :assetId ORDER BY r.timestamp ASC")
     Page<Reading> findByAssetId(@Param("assetId") Long assetId, Pageable pageable);
+
+    List<Reading> findTop120BySensor_Asset_IdOrderByTimestampDesc(Long assetId);
 
     void deleteBySensor_Asset_Id(Long assetId);
 }

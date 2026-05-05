@@ -18,5 +18,9 @@ public interface MaintenanceTicketRepository extends JpaRepository<MaintenanceTi
 
     List<MaintenanceTicket> findAllByOrderByCreatedAtDesc();
 
+    boolean existsByAsset_IdAndIssueTypeAndStatus(Long assetId, String issueType, MaintenanceTicket.TicketStatus status);
+
+    long countByAsset_IdAndStatus(Long assetId, MaintenanceTicket.TicketStatus status);
+
     void deleteByAsset_Id(Long assetId);
 }

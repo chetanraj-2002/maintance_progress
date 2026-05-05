@@ -41,6 +41,48 @@
       <mat-icon>confirmation_number</mat-icon>
       <div><span class="stat-n">{{ tickets.length }}</span><span class="stat-l">Total Tickets</span></div>
     </div>
+    <div class="stat-chip live">
+      <mat-icon>fiber_manual_record</mat-icon>
+      <div><span class="stat-n">Live</span><span class="stat-l">Last frame {{ liveTimestamp }}</span></div>
+    </div>
+  </div>
+
+  <div class="live-strip" *ngIf="selectedAsset">
+    <div class="live-main">
+      <span class="pulse-dot"></span>
+      <div>
+        <span class="live-title">{{ selectedAsset.assetName }} sensor stream</span>
+        <span class="live-sub">{{ readings.length }} latest samples plotted from simulated edge sensor feed</span>
+      </div>
+    </div>
+    <div class="live-metrics">
+      <div class="live-metric">
+        <span>RMS</span>
+        <strong>{{ latestRms }} g</strong>
+      </div>
+      <div class="live-metric">
+        <span>Temp</span>
+        <strong>{{ latestTemp }}°C</strong>
+      </div>
+      <div class="live-metric status-metric">
+        <span>Status</span>
+        <strong [class]="'status-text ' + selectedStatus">{{ selectedStatus }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-console" *ngIf="activeAlertTickets.length > 0">
+    <div class="alert-console-title">
+      <mat-icon>notification_important</mat-icon>
+      <span>Automatic alert tickets</span>
+    </div>
+    <div class="alert-items">
+      <div class="alert-item" *ngFor="let ticket of activeAlertTickets">
+        <span class="alert-asset">{{ ticket.asset.assetName }}</span>
+        <span class="alert-issue">{{ ticket.issueType }}</span>
+        <span class="alert-state">{{ ticket.status }}</span>
+      </div>
+    </div>
   </div>
 
   <!-- Top 3-Column Grid -->
@@ -177,7 +219,7 @@
   <mat-card class="dash-card">
     <mat-card-header>
       <mat-icon mat-card-avatar class="card-icon">show_chart</mat-icon>
-      <mat-card-title>Sensor Readings Chart</mat-card-title>
+      <mat-card-title>Live Sensor Readings Chart</mat-card-title>
       <mat-card-subtitle>
         <span *ngIf="selectedAsset">RMS &amp; Temperature — {{ selectedAsset.assetName }}</span>
         <span *ngIf="!selectedAsset">Select an asset to view chart</span>
@@ -186,7 +228,7 @@
     <mat-card-content>
       <div *ngIf="loadingReadings" class="loading-wrap">
         <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
-        <span>Loading readings…</span>
+        <span>Loading readings...</span>
       </div>
       <app-reading-chart
         *ngIf="!loadingReadings"

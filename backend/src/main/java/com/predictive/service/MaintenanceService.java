@@ -29,8 +29,24 @@ public class MaintenanceService {
         Threshold threshold = thresholdOpt.get();
         boolean rmsOver  = rms > threshold.getRmsMax();
         boolean tempOver = temperature > threshold.getTempMax();
+        boolean rmsWarn = rms > threshold.getRmsMax() * 0.85;
+        boolean tempWarn = temperature > threshold.getTempMax() * 0.85;
 
-        if (!rmsOver && !tempOver) return;
+        Asset asset = assetRepository.findById(assetId)
+                .orElseThrow(() -> new RuntimeException("Asset not found: " + assetId));
+
+        if (!rmsOver && !tempOver) {
+            long openTickets = ticketRepository.countByAsset_IdAndStatus(assetId, MaintenanceTicket.TicketStatus.OPEN);
+            if (openTickets > 0) {
+                asset.setStatus(Asset.AssetStatus.NEEDS_ATTEN);
+            } else if (rmsWarn || tempWarn) {
+                asset.setStatus(Asset.AssetStatus.WARNING);
+            } else {
+                asset.setStatus(Asset.AssetStatus.HEALTHY);
+            }
+            assetRepository.save(asset);
+            return;
+        }
 
         String issueType;
         if (rmsOver && tempOver) {
@@ -41,10 +57,14 @@ public class MaintenanceService {
             issueType = MaintenanceTicket.ISSUE_TEMP_OVER;
         }
 
-        Asset asset = assetRepository.findById(assetId)
-                .orElseThrow(() -> new RuntimeException("Asset not found: " + assetId));
-        asset.setStatus(Asset.AssetStatus.NEEDS_ATTEN);
+        asset.setStatus(rms > threshold.getRmsMax() * 1.2 || temperature > threshold.getTempMax() * 1.15
+                ? Asset.AssetStatus.ALERT
+                : Asset.AssetStatus.NEEDS_ATTEN);
         assetRepository.save(asset);
+
+        boolean openTicketExists = ticketRepository.existsByAsset_IdAndIssueTypeAndStatus(
+                assetId, issueType, MaintenanceTicket.TicketStatus.OPEN);
+        if (openTicketExists) return;
 
         MaintenanceTicket ticket = new MaintenanceTicket();
         ticket.setAsset(asset);

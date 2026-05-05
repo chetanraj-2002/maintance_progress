@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class ReadingService {
@@ -29,6 +31,12 @@ public class ReadingService {
             return readingRepository.findByAssetIdAndTimestampBetween(assetId, start, end, pageable);
         }
         return readingRepository.findByAssetId(assetId, pageable);
+    }
+
+    public List<Reading> getRecentReadings(Long assetId) {
+        List<Reading> readings = readingRepository.findTop120BySensor_Asset_IdOrderByTimestampDesc(assetId);
+        Collections.reverse(readings);
+        return readings;
     }
 
     @Transactional

@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PageEvent } from '@angular/material/paginator';
+import { Subscription, interval } from 'rxjs';
 import { Asset, Reading, Threshold, Ticket, OpenCountDto } from '../models/models';
 import { AssetService } from '../services/asset.service';
 import { ReadingService } from '../services/reading.service';
@@ -15,7 +16,7 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   // Data
   allAssets:    Asset[]       = [];
@@ -38,6 +39,9 @@ export class DashboardComponent implements OnInit {
   // Loading flags
   loadingAssets   = false;
   loadingReadings = false;
+  liveMode = true;
+  lastLiveRefresh: Date | null = null;
+  private liveSub?: Subscription;
 
   // Add Asset dialog
   showAddAsset = false;
@@ -65,6 +69,11 @@ export class DashboardComponent implements OnInit {
     this.loadAssets();
     this.loadTickets();
     this.loadOpenCounts();
+    this.startLiveFeed();
+  }
+
+  ngOnDestroy(): void {
+    this.liveSub?.unsubscribe();
   }
 
   // ── Asset loading ──────────────────────────────────────────
@@ -75,6 +84,11 @@ export class DashboardComponent implements OnInit {
         this.allAssets   = data;
         this.pageIndex   = 0;
         this.updatePage();
+        if (!this.selectedAsset && data.length > 0) {
+          this.onAssetSelected(data[0]);
+        } else {
+          this.syncSelectedAsset();
+        }
         this.loadingAssets = false;
       },
       error: () => this.loadingAssets = false
@@ -145,6 +159,9 @@ export class DashboardComponent implements OnInit {
   // ── Asset selected ─────────────────────────────────────────
   onAssetSelected(asset: Asset): void {
     this.selectedAsset = asset;
+    this.liveMode = true;
+    this.startDate = null;
+    this.endDate = null;
     this.loadReadings();
     this.loadThreshold(asset.id);
   }
@@ -152,6 +169,18 @@ export class DashboardComponent implements OnInit {
   loadReadings(): void {
     if (!this.selectedAsset) return;
     this.loadingReadings = true;
+    if (this.liveMode && !this.startDate && !this.endDate) {
+      this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
+        next: (readings) => {
+          this.readings = readings;
+          this.loadingReadings = false;
+          this.lastLiveRefresh = new Date();
+        },
+        error: ()    => this.loadingReadings = false
+      });
+      return;
+    }
+
     const s = this.startDate ? new Date(this.startDate.setHours(0,0,0,0)).toISOString().slice(0,19) : undefined;
     const e = this.endDate   ? new Date(this.endDate.setHours(23,59,59,999)).toISOString().slice(0,19) : undefined;
     this.readingService.getReadings(this.selectedAsset.id, s, e).subscribe({
@@ -169,13 +198,53 @@ export class DashboardComponent implements OnInit {
 
   onThresholdUpdated(t: Threshold): void { this.threshold = t; }
 
-  applyDateFilter(): void  { this.loadReadings(); }
-  clearDateFilter(): void  { this.startDate = null; this.endDate = null; this.loadReadings(); }
+  applyDateFilter(): void  { this.liveMode = false; this.loadReadings(); }
+  clearDateFilter(): void  { this.startDate = null; this.endDate = null; this.liveMode = true; this.loadReadings(); }
+
+  private startLiveFeed(): void {
+    this.liveSub = interval(3000).subscribe(() => this.refreshRealtimeData());
+  }
+
+  private refreshRealtimeData(): void {
+    this.assetService.getAll().subscribe({
+      next: (assets) => {
+        this.allAssets = assets;
+        this.updatePage();
+        this.syncSelectedAsset();
+      }
+    });
+    this.loadTickets();
+    this.loadOpenCounts();
+    if (this.selectedAsset && this.liveMode && !this.startDate && !this.endDate) {
+      this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
+        next: (readings) => {
+          this.readings = readings;
+          this.lastLiveRefresh = new Date();
+        }
+      });
+    }
+  }
+
+  private syncSelectedAsset(): void {
+    if (!this.selectedAsset) return;
+    const updated = this.allAssets.find(a => a.id === this.selectedAsset?.id);
+    if (updated) {
+      this.selectedAsset = updated;
+    }
+  }
 
   logout(): void { this.auth.logout(); }
 
   get rmsMax():  number { return this.threshold?.rmsMax  ?? 10; }
   get tempMax(): number { return this.threshold?.tempMax ?? 80; }
+  get latestReading(): Reading | null { return this.readings.length ? this.readings[this.readings.length - 1] : null; }
+  get latestRms(): string { return this.latestReading ? this.latestReading.rms.toFixed(1) : '--'; }
+  get latestTemp(): string { return this.latestReading ? this.latestReading.temperature.toFixed(1) : '--'; }
+  get selectedStatus(): string { return this.selectedAsset?.status ?? 'NO_ASSET'; }
+  get liveTimestamp(): string {
+    return this.lastLiveRefresh ? this.lastLiveRefresh.toLocaleTimeString('en-US', { hour12: false }) : '--:--:--';
+  }
+  get activeAlertTickets(): Ticket[] { return this.tickets.filter(t => t.status === 'OPEN').slice(0, 3); }
   get userName(): string { return this.auth.currentUser?.fullName ?? 'User'; }
   get userRole(): string { return this.auth.currentUser?.role === 'ADMIN' ? 'Admin' : 'Viewer'; }
   get canManageAssets(): boolean { return this.auth.isAdmin; }

@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #e2e8f0;
+  color: #0f172a;
   font-family: 'Exo 2', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
@@ -62,8 +62,8 @@
 
 .reading-count {
   font-size: 0.75rem;
-  color: #718096;
-  background: rgba(255,255,255,0.06);
+  color: #475569;
+  background: #f1f5f9;
   padding: 2px 8px;
   border-radius: 12px;
   font-family: 'Share Tech Mono', monospace;
@@ -83,21 +83,21 @@
 }
 
 .threshold-badge.rms {
-  background: rgba(99, 179, 237, 0.15);
-  color: #63b3ed;
-  border: 1px solid rgba(99, 179, 237, 0.3);
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
 }
 
 .threshold-badge.temp {
-  background: rgba(104, 211, 145, 0.15);
-  color: #68d391;
-  border: 1px solid rgba(104, 211, 145, 0.3);
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
 
 .threshold-badge.breach {
-  background: rgba(252, 129, 129, 0.15);
-  color: #fc8181;
-  border: 1px solid rgba(252, 129, 129, 0.3);
+  background: #fff1f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
 }
 
 .canvas-wrapper {
