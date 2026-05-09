@@ -41,13 +41,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ── Loading flags ──
   loadingAssets   = false;
   loadingReadings = false;
-  liveMode = true;
   lastLiveRefresh: Date | null = null;
   private liveSub?: Subscription;
-
-  // ── Date filter (assets view) ──
-  startDate: Date | null = null;
-  endDate:   Date | null = null;
 
   // ── Tickets pagination + show closed toggle ──
   ticketPageIndex = 0;
@@ -199,9 +194,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onAssetSelected(asset: Asset): void {
     this.selectedAsset = asset;
     this.sidebarCollapsed = true;          // auto-minimise sidebar
-    this.liveMode = true;
-    this.startDate = null;
-    this.endDate = null;
     this.loadReadings();
     this.loadThreshold(asset.id);
   }
@@ -217,24 +209,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!this.selectedAsset) return;
     this.loadingReadings = true;
 
-    if (this.liveMode && !this.startDate && !this.endDate) {
-      this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
-        next: (readings) => {
-          this.readings = readings;
-          this.loadingReadings = false;
-          this.lastLiveRefresh = new Date();
-        },
-        error: () => this.loadingReadings = false
-      });
-      return;
-    }
-
-    const s = this.startDate ? new Date(this.startDate.setHours(0, 0, 0, 0)).toISOString().slice(0, 19) : undefined;
-    const e = this.endDate   ? new Date(this.endDate.setHours(23, 59, 59, 999)).toISOString().slice(0, 19) : undefined;
-    this.readingService.getReadings(this.selectedAsset.id, s, e).subscribe({
-      next: (page) => {
-        this.readings = page.content;
+    this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
+      next: (readings) => {
+        this.readings = readings;
         this.loadingReadings = false;
+        this.lastLiveRefresh = new Date();
       },
       error: () => this.loadingReadings = false
     });
@@ -249,18 +228,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   onThresholdUpdated(t: Threshold): void {
     this.threshold = t;
-  }
-
-  applyDateFilter(): void {
-    this.liveMode = false;
-    this.loadReadings();
-  }
-
-  clearDateFilter(): void {
-    this.startDate = null;
-    this.endDate = null;
-    this.liveMode = true;
-    this.loadReadings();
   }
 
   // ── Tickets ─────────────────────────────────────────────────
@@ -369,7 +336,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
     this.loadTickets();
     this.loadOpenCounts();
-    if (this.selectedAsset && this.liveMode && !this.startDate && !this.endDate) {
+    if (this.selectedAsset) {
       this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
         next: (readings) => {
           this.readings = readings;

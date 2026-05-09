@@ -510,18 +510,6 @@
   top: 84px;
 }
 
-.filter-content {
-  display: flex !important;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding-top: 0 !important;
-}
-
-.date-field {
-  width: 160px;
-}
-
 @media (max-width: 1100px) {
   .detail-grid {
     grid-template-columns: 1fr;

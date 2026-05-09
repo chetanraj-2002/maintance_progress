@@ -1,8 +1,0 @@
--- Intentionally empty.
--- All assets, sensors, thresholds, readings and tickets are created at runtime:
---   * Assets / thresholds / sensors:  via the dashboard UI (POST /api/assets).
---   * Readings:                       generated every few seconds by SensorSimulationService
---                                     (random RMS + temperature per existing asset).
---   * Tickets:                        opened automatically when thresholds are exceeded
---                                     and via POST /api/tickets.
--- No hardcoded sample data is shipped with the backend.

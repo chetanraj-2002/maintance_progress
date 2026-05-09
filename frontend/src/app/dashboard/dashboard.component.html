@@ -213,27 +213,6 @@
               <mat-card-subtitle>RMS &amp; Temperature — refreshing every 3s</mat-card-subtitle>
             </mat-card-header>
 
-            <mat-card-content class="filter-content">
-              <mat-form-field appearance="outline" class="date-field">
-                <mat-label>Start date</mat-label>
-                <input matInput [matDatepicker]="sp" [(ngModel)]="startDate">
-                <mat-datepicker-toggle matIconSuffix [for]="sp"></mat-datepicker-toggle>
-                <mat-datepicker #sp [panelClass]="'datepicker-panel'" yPosition="below"></mat-datepicker>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="date-field">
-                <mat-label>End date</mat-label>
-                <input matInput [matDatepicker]="ep" [(ngModel)]="endDate">
-                <mat-datepicker-toggle matIconSuffix [for]="ep"></mat-datepicker-toggle>
-                <mat-datepicker #ep [panelClass]="'datepicker-panel'" yPosition="below"></mat-datepicker>
-              </mat-form-field>
-              <button mat-raised-button color="primary" (click)="applyDateFilter()">
-                <mat-icon>filter_alt</mat-icon> Apply
-              </button>
-              <button mat-stroked-button (click)="clearDateFilter()">
-                <mat-icon>clear</mat-icon> Clear
-              </button>
-            </mat-card-content>
-
             <mat-card-content>
               <div *ngIf="loadingReadings" class="loading-wrap">
                 <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
