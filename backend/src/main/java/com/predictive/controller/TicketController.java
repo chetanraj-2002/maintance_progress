@@ -3,7 +3,6 @@ package com.predictive.controller;
 import com.predictive.dto.OpenCountDto;
 import com.predictive.entity.MaintenanceTicket;
 import com.predictive.service.MaintenanceService;
-import com.predictive.util.RoleCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +28,7 @@ public class TicketController {
     }
 
     @PostMapping
-    public ResponseEntity<MaintenanceTicket> createTicket(
-            @RequestHeader(value = "X-User-Role", required = false) String role,
-            @RequestBody Map<String, Object> body) {
-        RoleCheck.requireAdmin(role);
+    public ResponseEntity<MaintenanceTicket> createTicket(@RequestBody Map<String, Object> body) {
         Long assetId = Long.valueOf(body.get("assetId").toString());
         String issueType = body.get("issueType").toString();
         MaintenanceTicket ticket = maintenanceService.createTicket(assetId, issueType);
@@ -49,12 +45,9 @@ public class TicketController {
         }
     }
 
-    /** Deleting a ticket is admin-only. */
+    /** Deleting a ticket is admin-only (enforced by SecurityConfig). */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTicket(
-            @RequestHeader(value = "X-User-Role", required = false) String role,
-            @PathVariable Long id) {
-        RoleCheck.requireAdmin(role);
+    public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
         try {
             maintenanceService.deleteTicket(id);
             return ResponseEntity.noContent().build();

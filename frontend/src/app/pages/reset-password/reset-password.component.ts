@@ -55,18 +55,17 @@ export class ResetPasswordComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
-    setTimeout(() => {
-      const result = this.auth.resetPassword(this.token, this.form.value.password);
+    this.auth.resetPassword(this.token, this.form.value.password).subscribe(result => {
       this.loading = false;
       if (result.ok) {
         this.success = true;
         this.snack.open('Password updated! Redirecting to login…', '', { duration: 2500, panelClass: ['snack-success'] });
-        setTimeout(() => this.router.navigate(['/login']), 2000);
+        setTimeout(() => this.router.navigate(['/login']), 1500);
       } else {
         this.snack.open(result.message, 'Close', { duration: 4000, panelClass: ['snack-error'] });
         this.invalidToken = true;
       }
-    }, 800);
+    });
   }
 
   goToLogin() { this.router.navigate(['/login']); }

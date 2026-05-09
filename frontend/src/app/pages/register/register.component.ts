@@ -56,17 +56,16 @@ export class RegisterComponent {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
-    setTimeout(() => {
-      const { fullName, email, phone, password, role } = this.form.value;
-      const result = this.auth.register(fullName, email, phone, password, role);
+    const { fullName, email, phone, password, role } = this.form.value;
+    this.auth.register(fullName, email, phone, password, role).subscribe(result => {
       this.loading = false;
       if (result.ok) {
         this.snack.open('Account created! Redirecting to dashboard…', '', { duration: 2500, panelClass: ['snack-success'] });
-        setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+        setTimeout(() => this.router.navigate(['/dashboard']), 1200);
       } else {
         this.snack.open(result.message, 'Close', { duration: 4000, panelClass: ['snack-error'] });
       }
-    }, 800);
+    });
   }
 
   goToLogin() { this.router.navigate(['/login']); }

@@ -35,17 +35,16 @@ export class LoginComponent {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
-    setTimeout(() => {
-      const { email, password } = this.form.value;
-      const result = this.auth.login(email, password);
+    const { email, password } = this.form.value;
+    this.auth.login(email, password).subscribe(result => {
       this.loading = false;
       if (result.ok) {
         this.snack.open(result.message, '', { duration: 2000, panelClass: ['snack-success'] });
-        setTimeout(() => this.router.navigate(['/dashboard']), 1200);
+        setTimeout(() => this.router.navigate(['/dashboard']), 1000);
       } else {
         this.snack.open(result.message, 'Close', { duration: 4000, panelClass: ['snack-error'] });
       }
-    }, 800);
+    });
   }
 
   goToRegister()     { this.router.navigate(['/register']); }

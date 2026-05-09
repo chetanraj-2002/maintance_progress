@@ -29,16 +29,15 @@ export class ForgotPasswordComponent {
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
-    setTimeout(() => {
-      const result = this.auth.sendResetLink(this.form.value.email);
+    this.auth.sendResetLink(this.form.value.email).subscribe(result => {
       this.loading = false;
       if (result.ok) {
         this.sent      = true;
-        this.demoToken = localStorage.getItem('pm_reset_token_demo') ?? '';
+        this.demoToken = result.token ?? '';
       } else {
         this.snack.open(result.message, 'Close', { duration: 4000, panelClass: ['snack-error'] });
       }
-    }, 900);
+    });
   }
 
   goToReset()  { this.router.navigate(['/reset-password'], { queryParams: { token: this.demoToken } }); }

@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { JwtInterceptor } from './interceptors/jwt.interceptor';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // Angular Material
@@ -69,7 +70,11 @@ import { ThresholdFormComponent } from './components/threshold-form/threshold-fo
     MatTooltipModule, MatPaginatorModule, MatDialogModule, MatSelectModule,
     BaseChartDirective
   ],
-  providers: [AuthGuard, provideCharts(withDefaultRegisterables())],
+  providers: [
+    AuthGuard,
+    provideCharts(withDefaultRegisterables()),
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

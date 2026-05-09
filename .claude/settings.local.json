@@ -2,7 +2,22 @@
   "permissions": {
     "allow": [
       "Bash(mvn clean *)",
-      "Bash(java -version)"
+      "Bash(java -version)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\2487322\\\\OneDrive - Cognizant\\\\Desktop\\\\final_interiem\" -Recurse -Directory -Depth 3)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(mvn -version)",
+      "Bash(mvn -q -DskipTests compile)",
+      "Bash(npx ng *)",
+      "Bash(mvn -DskipTests package)",
+      "Bash(powershell -NoProfile -Command \"try { \\(New-Object System.Net.Sockets.TcpClient\\('localhost',3306\\)\\).Connected } catch { 'no-mysql' }\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:9090/api/auth/login -X POST -H \"Content-Type: application/json\" -d '{}')",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} \\(assets\\)\\\\n\" http://localhost:9090/api/assets)",
+      "Bash(powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 9090 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | Select-Object -First 1\")",
+      "Bash(powershell -NoProfile -Command \"\\(New-Object System.Net.Sockets.TcpClient\\).ConnectAsync\\('localhost',9090\\).Wait\\(500\\); Get-NetTCPConnection -LocalPort 9090 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess\")",
+      "Bash(mvn -q -DskipTests package)",
+      "Bash(curl -s -X POST http://localhost:9090/api/auth/register -H \"Content-Type: application/json\" -d '{\"fullName\":\"Test User\",\"email\":\"test500@example.com\",\"password\":\"password123\"}' -w \"\\\\n--HTTP %{http_code}\\\\n\")",
+      "Bash(mysql -h localhost -u root -proot -e \"USE predictive_maintenance; DESCRIBE app_users;\")",
+      "Bash(mysql -h localhost -u root -proot -e \"USE predictive_maintenance; SELECT COUNT\\(*\\) AS user_count FROM app_users;\")"
     ]
   }
 }

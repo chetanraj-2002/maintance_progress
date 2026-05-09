@@ -1,6 +1,18 @@
 CREATE DATABASE IF NOT EXISTS predictive_maintenance;
 USE predictive_maintenance;
 
+CREATE TABLE IF NOT EXISTS app_users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(120) NOT NULL,
+    email VARCHAR(160) NOT NULL UNIQUE,
+    phone VARCHAR(40),
+    password_hash VARCHAR(200) NOT NULL,
+    role ENUM('ADMIN','USER') NOT NULL DEFAULT 'USER',
+    reset_token VARCHAR(120),
+    reset_token_expiry DATETIME,
+    created_at DATETIME NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS assets (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     asset_name VARCHAR(100) NOT NULL,

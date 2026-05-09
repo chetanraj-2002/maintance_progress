@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OpenCountDto, Ticket } from '../models/models';
-import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
   private baseUrl = 'http://localhost:9090/api/tickets';
 
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  constructor(private http: HttpClient) {}
 
   getAll(): Observable<Ticket[]> {
     return this.http.get<Ticket[]>(this.baseUrl);
@@ -19,7 +18,7 @@ export class TicketService {
   }
 
   create(assetId: number, issueType: string): Observable<Ticket> {
-    return this.http.post<Ticket>(this.baseUrl, { assetId, issueType }, this.roleHeaders());
+    return this.http.post<Ticket>(this.baseUrl, { assetId, issueType });
   }
 
   /** Close a ticket. Allowed for any logged-in user. */
@@ -27,14 +26,8 @@ export class TicketService {
     return this.http.patch<Ticket>(`${this.baseUrl}/${id}/close`, null);
   }
 
-  /** Delete a ticket. Admin-only. */
+  /** Delete a ticket. Admin-only (enforced by SecurityConfig). */
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`, this.roleHeaders());
-  }
-
-  private roleHeaders() {
-    return {
-      headers: { 'X-User-Role': this.auth.currentUser?.role ?? 'USER' }
-    };
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

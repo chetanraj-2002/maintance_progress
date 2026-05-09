@@ -3,7 +3,6 @@ package com.predictive.controller;
 import com.predictive.dto.ThresholdDto;
 import com.predictive.entity.Threshold;
 import com.predictive.service.MaintenanceService;
-import com.predictive.util.RoleCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +22,7 @@ public class ThresholdController {
     }
 
     @PostMapping
-    public ResponseEntity<Threshold> createOrUpdateThreshold(
-            @RequestHeader(value = "X-User-Role", required = false) String role,
-            @RequestBody ThresholdDto dto) {
-        RoleCheck.requireAdmin(role);
+    public ResponseEntity<Threshold> createOrUpdateThreshold(@RequestBody ThresholdDto dto) {
         Threshold saved = maintenanceService.saveOrUpdateThreshold(dto);
         return ResponseEntity.ok(saved);
     }

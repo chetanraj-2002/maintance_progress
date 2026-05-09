@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST http://localhost:9090/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test@example.com\",\"password\":\"password123\"}' -w \"\\\\n--HTTP %{http_code}\\\\n\")",
+      "Bash(mysql -h localhost -u root -proot predictive_maintenance -e \"ALTER TABLE app_users ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, MODIFY COLUMN phone VARCHAR\\(40\\) NULL, MODIFY COLUMN password_hash VARCHAR\\(255\\) NOT NULL; DESCRIBE app_users;\")",
+      "Bash(curl -s -X POST http://localhost:9090/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test500@example.com\",\"password\":\"password123\"}' -w \"\\\\n--HTTP %{http_code}\\\\n\")",
+      "Bash(curl -s -X POST http://localhost:9090/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"test500@example.com\",\"password\":\"wrong\"}' -w \"\\\\n--HTTP %{http_code}\\\\n\")"
+    ]
+  }
+}
