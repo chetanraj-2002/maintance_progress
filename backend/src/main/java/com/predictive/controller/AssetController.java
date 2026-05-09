@@ -2,6 +2,7 @@ package com.predictive.controller;
 
 import com.predictive.entity.Asset;
 import com.predictive.service.MaintenanceService;
+import com.predictive.util.RoleCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class AssetController {
     public ResponseEntity<Asset> createAsset(
             @RequestHeader(value = "X-User-Role", required = false) String role,
             @RequestBody Asset asset) {
-        requireAdmin(role);
+        RoleCheck.requireAdmin(role);
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(maintenanceService.createAsset(asset));
         } catch (IllegalArgumentException ex) {
@@ -46,7 +47,7 @@ public class AssetController {
             @RequestHeader(value = "X-User-Role", required = false) String role,
             @PathVariable Long id,
             @RequestBody Asset asset) {
-        requireAdmin(role);
+        RoleCheck.requireAdmin(role);
         try {
             return ResponseEntity.ok(maintenanceService.updateAsset(id, asset));
         } catch (IllegalArgumentException ex) {
@@ -60,18 +61,12 @@ public class AssetController {
     public ResponseEntity<Void> deleteAsset(
             @RequestHeader(value = "X-User-Role", required = false) String role,
             @PathVariable Long id) {
-        requireAdmin(role);
+        RoleCheck.requireAdmin(role);
         try {
             maintenanceService.deleteAsset(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException ex) {
             return ResponseEntity.notFound().build();
-        }
-    }
-
-    private void requireAdmin(String role) {
-        if (!"ADMIN".equalsIgnoreCase(role)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
         }
     }
 }

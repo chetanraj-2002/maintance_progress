@@ -37,29 +37,27 @@ import { AuthGuard } from './guards/auth.guard';
 // Components
 import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { AssetEditDialogComponent } from './dashboard/asset-edit-dialog/asset-edit-dialog.component';
 import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
-import { AssetListComponent } from './components/asset-list/asset-list.component';
 import { ReadingChartComponent } from './components/reading-chart/reading-chart.component';
 import { ThresholdFormComponent } from './components/threshold-form/threshold-form.component';
-import { TicketPanelComponent } from './components/ticket-panel/ticket-panel.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
+    AssetEditDialogComponent,
     HomeComponent,
     LoginComponent,
     RegisterComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
-    AssetListComponent,
     ReadingChartComponent,
-    ThresholdFormComponent,
-    TicketPanelComponent
+    ThresholdFormComponent
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, HttpClientModule,

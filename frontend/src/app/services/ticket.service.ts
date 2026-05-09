@@ -19,8 +19,22 @@ export class TicketService {
   }
 
   create(assetId: number, issueType: string): Observable<Ticket> {
-    return this.http.post<Ticket>(this.baseUrl, { assetId, issueType }, {
+    return this.http.post<Ticket>(this.baseUrl, { assetId, issueType }, this.roleHeaders());
+  }
+
+  /** Close a ticket. Allowed for any logged-in user. */
+  close(id: number): Observable<Ticket> {
+    return this.http.patch<Ticket>(`${this.baseUrl}/${id}/close`, null);
+  }
+
+  /** Delete a ticket. Admin-only. */
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, this.roleHeaders());
+  }
+
+  private roleHeaders() {
+    return {
       headers: { 'X-User-Role': this.auth.currentUser?.role ?? 'USER' }
-    });
+    };
   }
 }

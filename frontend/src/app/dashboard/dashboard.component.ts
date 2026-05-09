@@ -11,6 +11,14 @@ import { ThresholdService } from '../services/threshold.service';
 import { TicketService } from '../services/ticket.service';
 import { AuthService } from '../services/auth.service';
 
+type DashboardView = 'home' | 'assets' | 'tickets';
+
+const ISSUE_SEVERITY: Record<string, number> = {
+  RMS_AND_TEMP_OVER_THRESHOLD: 3,
+  RMS_OVER_THRESHOLD: 2,
+  TEMP_OVER_THRESHOLD: 1
+};
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -18,35 +26,43 @@ import { AuthService } from '../services/auth.service';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
-  // Data
-  allAssets:    Asset[]       = [];
-  pagedAssets:  Asset[]       = [];
-  readings:     Reading[]     = [];
-  tickets:      Ticket[]      = [];
-  openCounts:   OpenCountDto[] = [];
-  selectedAsset: Asset | null = null;
-  threshold:    Threshold | null = null;
+  // ── Layout state ──
+  activeView: DashboardView = 'home';
+  sidebarCollapsed = false;
 
-  // Pagination
-  pageSize  = 4;
-  pageIndex = 0;
-  pageSizeOptions = [4, 8, 12];
+  // ── Data ──
+  allAssets:  Asset[]        = [];
+  readings:   Reading[]      = [];
+  tickets:    Ticket[]       = [];
+  openCounts: OpenCountDto[] = [];
+  selectedAsset: Asset | null     = null;
+  threshold:     Threshold | null = null;
 
-  // Date filter
-  startDate: Date | null = null;
-  endDate:   Date | null = null;
-
-  // Loading flags
+  // ── Loading flags ──
   loadingAssets   = false;
   loadingReadings = false;
   liveMode = true;
   lastLiveRefresh: Date | null = null;
   private liveSub?: Subscription;
 
-  // Add Asset dialog
+  // ── Date filter (assets view) ──
+  startDate: Date | null = null;
+  endDate:   Date | null = null;
+
+  // ── Tickets pagination + show closed toggle ──
+  ticketPageIndex = 0;
+  ticketPageSize  = 8;
+  ticketPageSizeOptions = [5, 8, 12, 20];
+  showClosedTickets = false;
+
+  // ── Add Asset dialog ──
   showAddAsset = false;
   addAssetForm: FormGroup;
   addingAsset  = false;
+
+  // ── Edit Asset dialog ──
+  editingAsset: Asset | null = null;
+  editingThreshold: Threshold | null = null;
 
   constructor(
     private assetService:    AssetService,
@@ -65,7 +81,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (!this.auth.isLoggedIn) { this.router.navigate(['/login']); return; }
+    if (!this.auth.isLoggedIn) {
+      this.router.navigate(['/login']);
+      return;
+    }
     this.loadAssets();
     this.loadTickets();
     this.loadOpenCounts();
@@ -76,42 +95,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.liveSub?.unsubscribe();
   }
 
-  // ── Asset loading ──────────────────────────────────────────
+  // ── Sidebar / view switching ────────────────────────────────
+  setView(view: DashboardView): void {
+    this.activeView = view;
+    if (view !== 'assets') {
+      this.selectedAsset = null;
+      this.sidebarCollapsed = false;
+    }
+  }
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  // ── Asset loading ───────────────────────────────────────────
   loadAssets(): void {
     this.loadingAssets = true;
     this.assetService.getAll().subscribe({
       next: (data) => {
-        this.allAssets   = data;
-        this.pageIndex   = 0;
-        this.updatePage();
-        if (!this.selectedAsset && data.length > 0) {
-          this.onAssetSelected(data[0]);
-        } else {
-          this.syncSelectedAsset();
-        }
+        this.allAssets = data;
+        this.syncSelectedAsset();
         this.loadingAssets = false;
       },
       error: () => this.loadingAssets = false
     });
   }
 
-  updatePage(): void {
-    const start      = this.pageIndex * this.pageSize;
-    this.pagedAssets = this.allAssets.slice(start, start + this.pageSize);
+  // ── Add Asset (admin) ───────────────────────────────────────
+  openAddAsset(): void {
+    this.showAddAsset = true;
+    this.addAssetForm.reset();
   }
 
-  onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize  = event.pageSize;
-    this.updatePage();
+  closeAddAsset(): void {
+    this.showAddAsset = false;
   }
-
-  // ── Add Asset ──────────────────────────────────────────────
-  openAddAsset():  void { this.showAddAsset = true; this.addAssetForm.reset(); }
-  closeAddAsset(): void { this.showAddAsset = false; }
 
   submitAddAsset(): void {
-    if (this.addAssetForm.invalid) { this.addAssetForm.markAllAsTouched(); return; }
+    if (this.addAssetForm.invalid) {
+      this.addAssetForm.markAllAsTouched();
+      return;
+    }
     this.addingAsset = true;
     const payload: Partial<Asset> = {
       assetName: this.addAssetForm.value.assetName,
@@ -121,10 +145,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.assetService.create(payload as Asset).subscribe({
       next: (created) => {
         this.allAssets = [...this.allAssets, created];
-        this.updatePage();
         this.addingAsset  = false;
         this.showAddAsset = false;
-        this.snack.open(`Asset "${created.assetName}" added!`, '', { duration: 2500, panelClass: ['snack-success'] });
+        this.snack.open(`Asset "${created.assetName}" added`, '', { duration: 2000, panelClass: ['snack-success'] });
       },
       error: () => {
         this.addingAsset = false;
@@ -133,32 +156,49 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Delete Asset ───────────────────────────────────────────
-  deleteAsset(asset: Asset): void {
-    if (!confirm(`Delete "${asset.assetName}"? This also removes its readings and tickets.`)) return;
-    this.assetService.delete(asset.id).subscribe({
-      next: () => {
-        this.allAssets = this.allAssets.filter(a => a.id !== asset.id);
-        if (this.selectedAsset?.id === asset.id) { this.selectedAsset = null; this.readings = []; }
-        this.updatePage();
-        this.snack.open(`Asset "${asset.assetName}" deleted.`, '', { duration: 2500 });
-      },
-      error: () => this.snack.open('Failed to delete asset.', 'Close', { duration: 3000, panelClass: ['snack-error'] })
+  // ── Edit Asset (admin) ──────────────────────────────────────
+  openEditAsset(asset: Asset): void {
+    this.editingAsset = asset;
+    this.editingThreshold = null;
+    this.thresholdService.getByAssetId(asset.id).subscribe({
+      next: (t) => this.editingThreshold = t,
+      error: ()  => this.editingThreshold = null
     });
   }
 
-  // ── Tickets ────────────────────────────────────────────────
-  loadTickets(): void {
-    this.ticketService.getAll().subscribe({ next: d => this.tickets = d });
+  closeEditAsset(): void {
+    this.editingAsset = null;
+    this.editingThreshold = null;
   }
 
-  loadOpenCounts(): void {
-    this.ticketService.getOpenCounts().subscribe({ next: d => this.openCounts = d });
+  onAssetEdited(payload: { asset: Asset; threshold: Threshold | null }): void {
+    this.allAssets = this.allAssets.map(a => a.id === payload.asset.id ? payload.asset : a);
+    if (this.selectedAsset?.id === payload.asset.id) {
+      this.selectedAsset = payload.asset;
+      if (payload.threshold) {
+        this.threshold = payload.threshold;
+      }
+    }
+    this.closeEditAsset();
   }
 
-  // ── Asset selected ─────────────────────────────────────────
+  onAssetDeleted(deleted: Asset): void {
+    this.allAssets = this.allAssets.filter(a => a.id !== deleted.id);
+    if (this.selectedAsset?.id === deleted.id) {
+      this.selectedAsset = null;
+      this.readings = [];
+      this.threshold = null;
+      this.sidebarCollapsed = false;
+    }
+    this.closeEditAsset();
+    this.loadTickets();
+    this.loadOpenCounts();
+  }
+
+  // ── Asset selection (Assets view) ───────────────────────────
   onAssetSelected(asset: Asset): void {
     this.selectedAsset = asset;
+    this.sidebarCollapsed = true;          // auto-minimise sidebar
     this.liveMode = true;
     this.startDate = null;
     this.endDate = null;
@@ -166,9 +206,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadThreshold(asset.id);
   }
 
+  closeAssetDetail(): void {
+    this.selectedAsset = null;
+    this.readings = [];
+    this.threshold = null;
+    this.sidebarCollapsed = false;
+  }
+
   loadReadings(): void {
     if (!this.selectedAsset) return;
     this.loadingReadings = true;
+
     if (this.liveMode && !this.startDate && !this.endDate) {
       this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
         next: (readings) => {
@@ -176,16 +224,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.loadingReadings = false;
           this.lastLiveRefresh = new Date();
         },
-        error: ()    => this.loadingReadings = false
+        error: () => this.loadingReadings = false
       });
       return;
     }
 
-    const s = this.startDate ? new Date(this.startDate.setHours(0,0,0,0)).toISOString().slice(0,19) : undefined;
-    const e = this.endDate   ? new Date(this.endDate.setHours(23,59,59,999)).toISOString().slice(0,19) : undefined;
+    const s = this.startDate ? new Date(this.startDate.setHours(0, 0, 0, 0)).toISOString().slice(0, 19) : undefined;
+    const e = this.endDate   ? new Date(this.endDate.setHours(23, 59, 59, 999)).toISOString().slice(0, 19) : undefined;
     this.readingService.getReadings(this.selectedAsset.id, s, e).subscribe({
-      next: (page) => { this.readings = page.content; this.loadingReadings = false; },
-      error: ()    => this.loadingReadings = false
+      next: (page) => {
+        this.readings = page.content;
+        this.loadingReadings = false;
+      },
+      error: () => this.loadingReadings = false
     });
   }
 
@@ -196,11 +247,115 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  onThresholdUpdated(t: Threshold): void { this.threshold = t; }
+  onThresholdUpdated(t: Threshold): void {
+    this.threshold = t;
+  }
 
-  applyDateFilter(): void  { this.liveMode = false; this.loadReadings(); }
-  clearDateFilter(): void  { this.startDate = null; this.endDate = null; this.liveMode = true; this.loadReadings(); }
+  applyDateFilter(): void {
+    this.liveMode = false;
+    this.loadReadings();
+  }
 
+  clearDateFilter(): void {
+    this.startDate = null;
+    this.endDate = null;
+    this.liveMode = true;
+    this.loadReadings();
+  }
+
+  // ── Tickets ─────────────────────────────────────────────────
+  loadTickets(): void {
+    this.ticketService.getAll().subscribe({ next: d => this.tickets = d });
+  }
+
+  loadOpenCounts(): void {
+    this.ticketService.getOpenCounts().subscribe({ next: d => this.openCounts = d });
+  }
+
+  /** Sort tickets by status (OPEN > CLOSED), then severity, then newest first. */
+  private sortByPriority(list: Ticket[]): Ticket[] {
+    return [...list].sort((a, b) => {
+      if (a.status !== b.status) {
+        return a.status === 'OPEN' ? -1 : 1;
+      }
+      const sa = ISSUE_SEVERITY[a.issueType] ?? 0;
+      const sb = ISSUE_SEVERITY[b.issueType] ?? 0;
+      if (sa !== sb) return sb - sa;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+
+  get prioritisedTickets(): Ticket[] {
+    return this.sortByPriority(this.tickets);
+  }
+
+  get visibleTickets(): Ticket[] {
+    const all = this.prioritisedTickets;
+    return this.showClosedTickets ? all : all.filter(t => t.status === 'OPEN');
+  }
+
+  get pagedTickets(): Ticket[] {
+    const start = this.ticketPageIndex * this.ticketPageSize;
+    return this.visibleTickets.slice(start, start + this.ticketPageSize);
+  }
+
+  get pastTicketCount(): number {
+    return this.tickets.filter(t => t.status === 'CLOSED').length;
+  }
+
+  onTicketPage(event: PageEvent): void {
+    this.ticketPageIndex = event.pageIndex;
+    this.ticketPageSize  = event.pageSize;
+  }
+
+  togglePastTickets(): void {
+    this.showClosedTickets = !this.showClosedTickets;
+    this.ticketPageIndex = 0;
+  }
+
+  closeTicket(ticket: Ticket): void {
+    if (ticket.status !== 'OPEN') return;
+    this.ticketService.close(ticket.id).subscribe({
+      next: (updated) => {
+        this.tickets = this.tickets.map(t => t.id === updated.id ? updated : t);
+        this.loadOpenCounts();
+        this.loadAssets();
+        this.snack.open('Ticket closed', '', { duration: 1800, panelClass: ['snack-success'] });
+      },
+      error: () => this.snack.open('Failed to close ticket.', 'Close', { duration: 3000, panelClass: ['snack-error'] })
+    });
+  }
+
+  deleteTicket(ticket: Ticket): void {
+    if (!this.canManageAssets) return;
+    if (!confirm(`Delete this ticket for "${ticket.asset.assetName}"?`)) return;
+    this.ticketService.delete(ticket.id).subscribe({
+      next: () => {
+        this.tickets = this.tickets.filter(t => t.id !== ticket.id);
+        this.loadOpenCounts();
+        this.snack.open('Ticket deleted', '', { duration: 1800 });
+      },
+      error: () => this.snack.open('Failed to delete ticket.', 'Close', { duration: 3000, panelClass: ['snack-error'] })
+    });
+  }
+
+  formatIssue(issueType: string): string {
+    const map: Record<string, string> = {
+      RMS_OVER_THRESHOLD: 'RMS exceeded',
+      TEMP_OVER_THRESHOLD: 'Temperature exceeded',
+      RMS_AND_TEMP_OVER_THRESHOLD: 'RMS & temperature exceeded'
+    };
+    return map[issueType] ?? issueType.replace(/_/g, ' ');
+  }
+
+  ticketSeverityClass(issueType: string): string {
+    const score = ISSUE_SEVERITY[issueType] ?? 0;
+    if (score >= 3) return 'severity-critical';
+    if (score === 2) return 'severity-high';
+    return 'severity-medium';
+  }
+
+  // ── Live feed ───────────────────────────────────────────────
   private startLiveFeed(): void {
     this.liveSub = interval(3000).subscribe(() => this.refreshRealtimeData());
   }
@@ -209,7 +364,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.assetService.getAll().subscribe({
       next: (assets) => {
         this.allAssets = assets;
-        this.updatePage();
         this.syncSelectedAsset();
       }
     });
@@ -228,26 +382,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private syncSelectedAsset(): void {
     if (!this.selectedAsset) return;
     const updated = this.allAssets.find(a => a.id === this.selectedAsset?.id);
-    if (updated) {
-      this.selectedAsset = updated;
-    }
+    if (updated) this.selectedAsset = updated;
   }
 
-  logout(): void { this.auth.logout(); }
+  // ── Auth helpers ────────────────────────────────────────────
+  logout(): void {
+    this.auth.logout();
+  }
 
+  // ── Convenience getters used by the template ───────────────
   get rmsMax():  number { return this.threshold?.rmsMax  ?? 10; }
   get tempMax(): number { return this.threshold?.tempMax ?? 80; }
-  get latestReading(): Reading | null { return this.readings.length ? this.readings[this.readings.length - 1] : null; }
-  get latestRms(): string { return this.latestReading ? this.latestReading.rms.toFixed(1) : '--'; }
+
+  get latestReading(): Reading | null {
+    return this.readings.length ? this.readings[this.readings.length - 1] : null;
+  }
+  get latestRms():  string { return this.latestReading ? this.latestReading.rms.toFixed(1) : '--'; }
   get latestTemp(): string { return this.latestReading ? this.latestReading.temperature.toFixed(1) : '--'; }
   get selectedStatus(): string { return this.selectedAsset?.status ?? 'NO_ASSET'; }
   get liveTimestamp(): string {
-    return this.lastLiveRefresh ? this.lastLiveRefresh.toLocaleTimeString('en-US', { hour12: false }) : '--:--:--';
+    return this.lastLiveRefresh
+      ? this.lastLiveRefresh.toLocaleTimeString('en-US', { hour12: false })
+      : '--:--:--';
   }
-  get activeAlertTickets(): Ticket[] { return this.tickets.filter(t => t.status === 'OPEN').slice(0, 3); }
+
+  get criticalTickets(): Ticket[] {
+    return this.prioritisedTickets.filter(t => t.status === 'OPEN').slice(0, 5);
+  }
+
+  get openTicketCount(): number { return this.tickets.filter(t => t.status === 'OPEN').length; }
+  get healthyAssetCount(): number { return this.allAssets.filter(a => a.status === 'HEALTHY').length; }
+  get alertAssetCount():   number { return this.allAssets.filter(a => a.status === 'ALERT').length; }
+
   get userName(): string { return this.auth.currentUser?.fullName ?? 'User'; }
   get userRole(): string { return this.auth.currentUser?.role === 'ADMIN' ? 'Admin' : 'Viewer'; }
   get canManageAssets(): boolean { return this.auth.isAdmin; }
-  get addName()  { return this.addAssetForm.get('assetName')!; }
-  get addLoc()   { return this.addAssetForm.get('location')!; }
+
+  get addName() { return this.addAssetForm.get('assetName')!; }
+  get addLoc()  { return this.addAssetForm.get('location')!; }
 }

@@ -181,6 +181,33 @@ public class MaintenanceService {
         return ticketRepository.save(ticket);
     }
 
+    @Transactional
+    public MaintenanceTicket closeTicket(Long ticketId) {
+        MaintenanceTicket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found: " + ticketId));
+        ticket.setStatus(MaintenanceTicket.TicketStatus.CLOSED);
+        MaintenanceTicket saved = ticketRepository.save(ticket);
+
+        // Refresh asset status when its last open ticket is resolved.
+        Long assetId = ticket.getAsset().getId();
+        long stillOpen = ticketRepository.countByAsset_IdAndStatus(assetId, MaintenanceTicket.TicketStatus.OPEN);
+        if (stillOpen == 0) {
+            assetRepository.findById(assetId).ifPresent(asset -> {
+                asset.setStatus(Asset.AssetStatus.HEALTHY);
+                assetRepository.save(asset);
+            });
+        }
+        return saved;
+    }
+
+    @Transactional
+    public void deleteTicket(Long ticketId) {
+        if (!ticketRepository.existsById(ticketId)) {
+            throw new RuntimeException("Ticket not found: " + ticketId);
+        }
+        ticketRepository.deleteById(ticketId);
+    }
+
     private String cleanRequired(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException(fieldName + " is required");

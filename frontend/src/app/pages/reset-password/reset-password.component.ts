@@ -23,7 +23,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.component.html',
-  styleUrls: ['./reset-password.component.css']
+  styleUrls: ['../auth-center-shared.css', './reset-password.component.css']
 })
 export class ResetPasswordComponent implements OnInit {
   form: FormGroup;

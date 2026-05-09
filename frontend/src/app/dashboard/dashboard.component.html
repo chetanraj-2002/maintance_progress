@@ -1,18 +1,34 @@
-<!-- Toolbar -->
-<mat-toolbar class="dash-toolbar">
-  <div class="toolbar-brand" routerLink="/">
+<!-- ════════════════════════════════════════════════════════════
+     Dashboard layout
+     ┌──────────────────────────────────────────────┐
+     │ Top navbar                                   │
+     ├────────────┬─────────────────────────────────┤
+     │ Sidebar    │ Main view (Home / Assets /      │
+     │ (collapse) │            Tickets)             │
+     └────────────┴─────────────────────────────────┘
+     ════════════════════════════════════════════════════════════ -->
+
+<!-- Top Navbar -->
+<mat-toolbar class="dash-navbar">
+  <button mat-icon-button class="sidebar-toggle" (click)="toggleSidebar()" matTooltip="Toggle sidebar">
+    <mat-icon>{{ sidebarCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
+  </button>
+
+  <div class="nav-brand" routerLink="/">
     <mat-icon class="brand-icon">precision_manufacturing</mat-icon>
     <div class="brand-text">
       <span class="brand-title">PredictiveMaintenance</span>
       <span class="brand-sub">LITE</span>
     </div>
   </div>
-  <div class="toolbar-spacer"></div>
 
-  <div class="toolbar-right">
+  <span class="nav-spacer"></span>
+
+  <div class="nav-user-area">
     <div class="user-chip">
       <mat-icon>account_circle</mat-icon>
-      <span>{{ userName }} - {{ userRole }}</span>
+      <span>{{ userName }}</span>
+      <span class="user-role" [class.is-admin]="canManageAssets">{{ userRole }}</span>
     </div>
     <button mat-stroked-button class="logout-btn" (click)="logout()">
       <mat-icon>logout</mat-icon> Logout
@@ -20,240 +36,366 @@
   </div>
 </mat-toolbar>
 
-<!-- Main Layout -->
-<div class="dashboard-root">
+<!-- Body: sidebar + main content -->
+<div class="dash-body" [class.sidebar-collapsed]="sidebarCollapsed">
 
-  <!-- Stats Row -->
-  <div class="stats-row">
-    <div class="stat-chip">
-      <mat-icon>inventory_2</mat-icon>
-      <div><span class="stat-n">{{ allAssets.length }}</span><span class="stat-l">Total Assets</span></div>
-    </div>
-    <div class="stat-chip warn" *ngIf="openCounts.length > 0">
-      <mat-icon>warning_amber</mat-icon>
-      <div><span class="stat-n">{{ openCounts.length }}</span><span class="stat-l">Need Attention</span></div>
-    </div>
-    <div class="stat-chip good" *ngIf="openCounts.length === 0">
-      <mat-icon>check_circle</mat-icon>
-      <div><span class="stat-n">All Clear</span><span class="stat-l">No open tickets</span></div>
-    </div>
-    <div class="stat-chip info">
-      <mat-icon>confirmation_number</mat-icon>
-      <div><span class="stat-n">{{ tickets.length }}</span><span class="stat-l">Total Tickets</span></div>
-    </div>
-    <div class="stat-chip live">
-      <mat-icon>fiber_manual_record</mat-icon>
-      <div><span class="stat-n">Live</span><span class="stat-l">Last frame {{ liveTimestamp }}</span></div>
-    </div>
-  </div>
+  <!-- ═══ Sidebar ═══ -->
+  <aside class="sidebar">
+    <button class="nav-item"
+            [class.active]="activeView === 'home'"
+            (click)="setView('home')">
+      <mat-icon>dashboard</mat-icon>
+      <span class="nav-label">Home</span>
+    </button>
 
-  <div class="live-strip" *ngIf="selectedAsset">
-    <div class="live-main">
-      <span class="pulse-dot"></span>
-      <div>
-        <span class="live-title">{{ selectedAsset.assetName }} sensor stream</span>
-        <span class="live-sub">{{ readings.length }} latest samples plotted from simulated edge sensor feed</span>
+    <button class="nav-item"
+            [class.active]="activeView === 'assets'"
+            (click)="setView('assets')">
+      <mat-icon>precision_manufacturing</mat-icon>
+      <span class="nav-label">Assets &amp; Monitoring</span>
+    </button>
+
+    <button class="nav-item"
+            [class.active]="activeView === 'tickets'"
+            (click)="setView('tickets')">
+      <mat-icon [matBadge]="openTicketCount > 0 ? openTicketCount : null"
+                matBadgeColor="warn" matBadgeSize="small">
+        confirmation_number
+      </mat-icon>
+      <span class="nav-label">Tickets</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-stat" *ngIf="!sidebarCollapsed">
+        <span class="sidebar-stat-label">Live frame</span>
+        <span class="sidebar-stat-value">{{ liveTimestamp }}</span>
       </div>
     </div>
-    <div class="live-metrics">
-      <div class="live-metric">
-        <span>RMS</span>
-        <strong>{{ latestRms }} g</strong>
-      </div>
-      <div class="live-metric">
-        <span>Temp</span>
-        <strong>{{ latestTemp }}°C</strong>
-      </div>
-      <div class="live-metric status-metric">
-        <span>Status</span>
-        <strong [class]="'status-text ' + selectedStatus">{{ selectedStatus }}</strong>
-      </div>
-    </div>
-  </div>
+  </aside>
 
-  <div class="alert-console" *ngIf="activeAlertTickets.length > 0">
-    <div class="alert-console-title">
-      <mat-icon>notification_important</mat-icon>
-      <span>Automatic alert tickets</span>
-    </div>
-    <div class="alert-items">
-      <div class="alert-item" *ngFor="let ticket of activeAlertTickets">
-        <span class="alert-asset">{{ ticket.asset.assetName }}</span>
-        <span class="alert-issue">{{ ticket.issueType }}</span>
-        <span class="alert-state">{{ ticket.status }}</span>
+  <!-- ═══ Main ═══ -->
+  <main class="dash-main">
+
+    <!-- ═════════════════ HOME VIEW ═════════════════ -->
+    <ng-container *ngIf="activeView === 'home'">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Welcome back, {{ userName }}</h1>
+          <p class="view-sub">Live overview of your monitored assets</p>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Top 3-Column Grid -->
-  <div class="top-grid">
+      <!-- Stats grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon-wrap blue"><mat-icon>inventory_2</mat-icon></div>
+          <div>
+            <div class="stat-num">{{ allAssets.length }}</div>
+            <div class="stat-label">Total assets</div>
+          </div>
+        </div>
 
-    <!-- Column 1: Asset List + Pagination -->
-    <mat-card class="dash-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar class="card-icon">list_alt</mat-icon>
-        <mat-card-title>Assets</mat-card-title>
-        <mat-card-subtitle>{{ allAssets.length }} monitored assets</mat-card-subtitle>
-        <div class="card-header-action" *ngIf="canManageAssets">
-          <button mat-raised-button color="primary" class="add-btn" (click)="openAddAsset()">
-            <mat-icon>add</mat-icon> Add Asset
+        <div class="stat-card">
+          <div class="stat-icon-wrap green"><mat-icon>check_circle</mat-icon></div>
+          <div>
+            <div class="stat-num">{{ healthyAssetCount }}</div>
+            <div class="stat-label">Healthy</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon-wrap orange"><mat-icon>warning_amber</mat-icon></div>
+          <div>
+            <div class="stat-num">{{ openTicketCount }}</div>
+            <div class="stat-label">Open tickets</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon-wrap red"><mat-icon>notification_important</mat-icon></div>
+          <div>
+            <div class="stat-num">{{ alertAssetCount }}</div>
+            <div class="stat-label">In alert</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Critical action card -->
+      <mat-card class="critical-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="critical-avatar">priority_high</mat-icon>
+          <mat-card-title>Critical action required</mat-card-title>
+          <mat-card-subtitle>
+            {{ criticalTickets.length > 0
+                ? 'Top ' + criticalTickets.length + ' open tickets — sorted by severity'
+                : 'No open tickets — all clear.' }}
+          </mat-card-subtitle>
+          <button mat-stroked-button class="header-action" (click)="setView('tickets')">
+            View all tickets <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div *ngIf="criticalTickets.length === 0" class="empty-state">
+            <mat-icon>verified</mat-icon>
+            <p>No critical issues. All assets are operating within thresholds.</p>
+          </div>
+
+          <div class="critical-list" *ngIf="criticalTickets.length > 0">
+            <div class="critical-row" *ngFor="let t of criticalTickets"
+                 [class]="ticketSeverityClass(t.issueType)">
+              <div class="critical-main">
+                <mat-icon class="critical-icon">warning</mat-icon>
+                <div>
+                  <div class="critical-asset">{{ t.asset.assetName }}</div>
+                  <div class="critical-issue">{{ formatIssue(t.issueType) }}</div>
+                </div>
+              </div>
+              <div class="critical-meta">
+                <span class="severity-pill">{{ ticketSeverityClass(t.issueType).replace('severity-', '') }}</span>
+                <button mat-stroked-button color="primary"
+                        (click)="closeTicket(t)"
+                        matTooltip="Mark as resolved">
+                  <mat-icon>task_alt</mat-icon> Resolve
+                </button>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </ng-container>
+
+    <!-- ═════════════════ ASSETS VIEW ═════════════════ -->
+    <ng-container *ngIf="activeView === 'assets'">
+
+      <!-- Detail mode (asset selected) -->
+      <ng-container *ngIf="selectedAsset; else assetsListTpl">
+        <div class="view-header">
+          <button mat-icon-button (click)="closeAssetDetail()" matTooltip="Back to all assets">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div>
+            <h1 class="view-title">{{ selectedAsset.assetName }}</h1>
+            <p class="view-sub">
+              {{ selectedAsset.location }} ·
+              <span [class]="'status-pill ' + selectedAsset.status">{{ selectedAsset.status }}</span>
+            </p>
+          </div>
+          <span class="view-spacer"></span>
+          <button mat-stroked-button color="primary" *ngIf="canManageAssets"
+                  (click)="openEditAsset(selectedAsset)">
+            <mat-icon>edit</mat-icon> Edit asset
           </button>
         </div>
-      </mat-card-header>
 
-      <mat-card-content>
-        <div *ngIf="loadingAssets" class="loading-wrap">
-          <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+        <!-- Detail layout: info+threshold left, chart right -->
+        <div class="detail-grid">
+          <mat-card class="dash-card detail-side">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="card-icon">tune</mat-icon>
+              <mat-card-title>Thresholds</mat-card-title>
+              <mat-card-subtitle>RMS &amp; temperature limits</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <app-threshold-form
+                [threshold]="threshold"
+                [selectedAssetId]="selectedAsset.id"
+                [readonly]="!canManageAssets"
+                (thresholdUpdated)="onThresholdUpdated($event)">
+              </app-threshold-form>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="dash-card detail-chart">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="card-icon">show_chart</mat-icon>
+              <mat-card-title>Live sensor readings</mat-card-title>
+              <mat-card-subtitle>RMS &amp; Temperature — refreshing every 3s</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content class="filter-content">
+              <mat-form-field appearance="outline" class="date-field">
+                <mat-label>Start date</mat-label>
+                <input matInput [matDatepicker]="sp" [(ngModel)]="startDate">
+                <mat-datepicker-toggle matIconSuffix [for]="sp"></mat-datepicker-toggle>
+                <mat-datepicker #sp [panelClass]="'datepicker-panel'" yPosition="below"></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="date-field">
+                <mat-label>End date</mat-label>
+                <input matInput [matDatepicker]="ep" [(ngModel)]="endDate">
+                <mat-datepicker-toggle matIconSuffix [for]="ep"></mat-datepicker-toggle>
+                <mat-datepicker #ep [panelClass]="'datepicker-panel'" yPosition="below"></mat-datepicker>
+              </mat-form-field>
+              <button mat-raised-button color="primary" (click)="applyDateFilter()">
+                <mat-icon>filter_alt</mat-icon> Apply
+              </button>
+              <button mat-stroked-button (click)="clearDateFilter()">
+                <mat-icon>clear</mat-icon> Clear
+              </button>
+            </mat-card-content>
+
+            <mat-card-content>
+              <div *ngIf="loadingReadings" class="loading-wrap">
+                <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
+              </div>
+              <app-reading-chart
+                *ngIf="!loadingReadings"
+                [readings]="readings"
+                [selectedAssetName]="selectedAsset.assetName"
+                [rmsMax]="rmsMax"
+                [tempMax]="tempMax">
+              </app-reading-chart>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </ng-container>
+
+      <!-- List mode (no asset selected) -->
+      <ng-template #assetsListTpl>
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Assets &amp; Monitoring</h1>
+            <p class="view-sub">{{ allAssets.length }} monitored assets — click any row to drill in</p>
+          </div>
+          <span class="view-spacer"></span>
+          <button mat-raised-button color="primary" *ngIf="canManageAssets"
+                  (click)="openAddAsset()">
+            <mat-icon>add</mat-icon> Add asset
+          </button>
         </div>
 
-        <div *ngIf="!loadingAssets && allAssets.length === 0" class="empty-state">
-          <mat-icon>inventory_2</mat-icon>
-          <p>No assets yet. Click <strong>Add Asset</strong> to get started.</p>
-        </div>
+        <mat-card class="dash-card">
+          <mat-card-content>
+            <div *ngIf="loadingAssets" class="loading-wrap">
+              <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+            </div>
 
-        <div *ngIf="!loadingAssets && allAssets.length > 0" class="asset-table-wrap">
-          <table class="asset-table">
-            <thead>
-              <tr>
-                <th>Asset</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th *ngIf="canManageAssets"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let a of pagedAssets"
-                  [class.selected-row]="selectedAsset?.id === a.id"
-                  (click)="onAssetSelected(a)">
-                <td>
-                  <div class="asset-name-cell">
-                    <mat-icon class="asset-row-icon">precision_manufacturing</mat-icon>
-                    {{ a.assetName }}
-                  </div>
-                </td>
-                <td class="loc-cell">{{ a.location }}</td>
-                <td><span [class]="'status-pill ' + a.status">{{ a.status }}</span></td>
-                <td *ngIf="canManageAssets">
-                  <button mat-icon-button class="del-btn"
-                    (click)="deleteAsset(a); $event.stopPropagation()"
-                    matTooltip="Delete asset">
-                    <mat-icon>delete_outline</mat-icon>
+            <div *ngIf="!loadingAssets && allAssets.length === 0" class="empty-state">
+              <mat-icon>inventory_2</mat-icon>
+              <p>No assets yet. Click <strong>Add asset</strong> to get started.</p>
+            </div>
+
+            <div class="asset-grid" *ngIf="!loadingAssets && allAssets.length > 0">
+              <div class="asset-tile" *ngFor="let a of allAssets" (click)="onAssetSelected(a)">
+                <div class="asset-tile-top">
+                  <mat-icon class="asset-tile-icon">precision_manufacturing</mat-icon>
+                  <span [class]="'status-pill ' + a.status">{{ a.status }}</span>
+                </div>
+                <div class="asset-tile-name">{{ a.assetName }}</div>
+                <div class="asset-tile-loc">
+                  <mat-icon>location_on</mat-icon>{{ a.location }}
+                </div>
+                <div class="asset-tile-actions" *ngIf="canManageAssets">
+                  <button mat-stroked-button color="primary"
+                          (click)="openEditAsset(a); $event.stopPropagation()"
+                          matTooltip="Edit asset">
+                    <mat-icon>edit</mat-icon> Edit
                   </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </ng-template>
+    </ng-container>
 
-          <!-- Pagination -->
-          <mat-paginator
-            [length]="allAssets.length"
-            [pageSize]="pageSize"
-            [pageSizeOptions]="pageSizeOptions"
-            [pageIndex]="pageIndex"
-            (page)="onPageChange($event)"
-            aria-label="Select page">
-          </mat-paginator>
+    <!-- ═════════════════ TICKETS VIEW ═════════════════ -->
+    <ng-container *ngIf="activeView === 'tickets'">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Maintenance tickets</h1>
+          <p class="view-sub">
+            {{ openTicketCount }} open · {{ pastTicketCount }} closed · sorted by priority
+          </p>
         </div>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Column 2: Threshold Form -->
-    <mat-card class="dash-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar class="card-icon">tune</mat-icon>
-        <mat-card-title>Thresholds</mat-card-title>
-        <mat-card-subtitle>{{ selectedAsset ? selectedAsset.assetName : 'Select an asset' }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <app-threshold-form
-          [threshold]="threshold"
-          [selectedAssetId]="selectedAsset?.id ?? null"
-          [readonly]="!canManageAssets"
-          (thresholdUpdated)="onThresholdUpdated($event)">
-        </app-threshold-form>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Column 3: Ticket Panel -->
-    <mat-card class="dash-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar class="card-icon">confirmation_number</mat-icon>
-        <mat-card-title>Maintenance Tickets</mat-card-title>
-        <mat-card-subtitle>{{ tickets.length }} total | Open on {{ openCounts.length }} assets</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content class="ticket-scroll">
-        <app-ticket-panel [tickets]="tickets" [openCounts]="openCounts"></app-ticket-panel>
-      </mat-card-content>
-    </mat-card>
-
-  </div>
-
-  <!-- Date Filter -->
-  <mat-card class="dash-card filter-card" *ngIf="selectedAsset">
-    <mat-card-content class="filter-content">
-      <div class="filter-label">
-        <mat-icon>date_range</mat-icon>
-        <span>Filter readings for <strong>{{ selectedAsset.assetName }}</strong></span>
+        <span class="view-spacer"></span>
+        <button mat-stroked-button (click)="togglePastTickets()">
+          <mat-icon>{{ showClosedTickets ? 'visibility_off' : 'history' }}</mat-icon>
+          {{ showClosedTickets ? 'Hide past tickets' : 'View past tickets' }}
+        </button>
       </div>
-      <div class="date-pickers">
-        <mat-form-field appearance="outline" class="date-field">
-          <mat-label>Start Date</mat-label>
-          <input matInput [matDatepicker]="sp" [(ngModel)]="startDate">
-          <mat-datepicker-toggle matIconSuffix [for]="sp"></mat-datepicker-toggle>
-          <mat-datepicker #sp [panelClass]="'datepicker-panel'" yPosition="below"></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="date-field">
-          <mat-label>End Date</mat-label>
-          <input matInput [matDatepicker]="ep" [(ngModel)]="endDate">
-          <mat-datepicker-toggle matIconSuffix [for]="ep"></mat-datepicker-toggle>
-          <mat-datepicker #ep [panelClass]="'datepicker-panel'" yPosition="below"></mat-datepicker>
-        </mat-form-field>
-        <button mat-raised-button color="primary" (click)="applyDateFilter()"><mat-icon>filter_alt</mat-icon> Apply</button>
-        <button mat-stroked-button (click)="clearDateFilter()"><mat-icon>clear</mat-icon> Clear</button>
-        <span class="reading-info" *ngIf="readings.length > 0"><mat-icon>info_outline</mat-icon> {{ readings.length }} readings</span>
-      </div>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- Chart -->
-  <mat-card class="dash-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar class="card-icon">show_chart</mat-icon>
-      <mat-card-title>Live Sensor Readings Chart</mat-card-title>
-      <mat-card-subtitle>
-        <span *ngIf="selectedAsset">RMS &amp; Temperature — {{ selectedAsset.assetName }}</span>
-        <span *ngIf="!selectedAsset">Select an asset to view chart</span>
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngIf="loadingReadings" class="loading-wrap">
-        <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
-        <span>Loading readings...</span>
-      </div>
-      <app-reading-chart
-        *ngIf="!loadingReadings"
-        [readings]="readings"
-        [selectedAssetName]="selectedAsset?.assetName ?? ''"
-        [rmsMax]="rmsMax"
-        [tempMax]="tempMax">
-      </app-reading-chart>
-    </mat-card-content>
-  </mat-card>
+      <mat-card class="dash-card">
+        <mat-card-content>
+          <div *ngIf="visibleTickets.length === 0" class="empty-state">
+            <mat-icon>verified</mat-icon>
+            <p *ngIf="!showClosedTickets">No open tickets. All assets are operating within thresholds.</p>
+            <p *ngIf="showClosedTickets">No tickets recorded yet.</p>
+          </div>
 
+          <div class="ticket-table" *ngIf="visibleTickets.length > 0">
+            <div class="ticket-row" *ngFor="let t of pagedTickets"
+                 [class]="ticketSeverityClass(t.issueType)"
+                 [class.row-closed]="t.status === 'CLOSED'">
+              <div class="ticket-cell asset-cell">
+                <mat-icon>warning</mat-icon>
+                <div>
+                  <div class="ticket-asset">{{ t.asset.assetName }}</div>
+                  <div class="ticket-issue">{{ formatIssue(t.issueType) }}</div>
+                </div>
+              </div>
+
+              <div class="ticket-cell severity-cell">
+                <span class="severity-pill">{{ ticketSeverityClass(t.issueType).replace('severity-', '') }}</span>
+              </div>
+
+              <div class="ticket-cell status-cell">
+                <span class="status-badge"
+                      [class.open-badge]="t.status === 'OPEN'"
+                      [class.closed-badge]="t.status === 'CLOSED'">
+                  {{ t.status }}
+                </span>
+              </div>
+
+              <div class="ticket-cell date-cell">
+                <mat-icon>schedule</mat-icon>
+                {{ t.createdAt | date: 'MMM d, y, HH:mm' }}
+              </div>
+
+              <div class="ticket-cell action-cell">
+                <button mat-stroked-button color="primary"
+                        *ngIf="t.status === 'OPEN'"
+                        (click)="closeTicket(t)"
+                        matTooltip="Mark as resolved (visible to admin)">
+                  <mat-icon>task_alt</mat-icon> Resolve
+                </button>
+                <button mat-icon-button color="warn"
+                        *ngIf="canManageAssets"
+                        (click)="deleteTicket(t)"
+                        matTooltip="Delete ticket (admin)">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <mat-paginator *ngIf="visibleTickets.length > 0"
+                         [length]="visibleTickets.length"
+                         [pageSize]="ticketPageSize"
+                         [pageSizeOptions]="ticketPageSizeOptions"
+                         [pageIndex]="ticketPageIndex"
+                         (page)="onTicketPage($event)"
+                         aria-label="Ticket pagination">
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    </ng-container>
+
+  </main>
 </div>
 
 <!-- ══ Add Asset Dialog ══ -->
 <div class="dialog-overlay" *ngIf="showAddAsset && canManageAssets" (click)="closeAddAsset()">
   <div class="dialog-box" (click)="$event.stopPropagation()">
     <div class="dialog-header">
-      <h2 class="dialog-title"><mat-icon>add_box</mat-icon> Add New Asset</h2>
+      <h2 class="dialog-title"><mat-icon>add_box</mat-icon> Add new asset</h2>
       <button mat-icon-button (click)="closeAddAsset()"><mat-icon>close</mat-icon></button>
     </div>
-    <p class="dialog-sub">A default sensor and threshold (RMS 10g / Temp 80°C) will be created automatically.</p>
+    <p class="dialog-sub">A default sensor and threshold (RMS 10 g / Temp 80 °C) will be created automatically.</p>
 
     <form [formGroup]="addAssetForm" (ngSubmit)="submitAddAsset()" novalidate class="dialog-form">
       <mat-form-field appearance="outline" class="dialog-field">
-        <mat-label>Asset Name</mat-label>
+        <mat-label>Asset name</mat-label>
         <mat-icon matPrefix>precision_manufacturing</mat-icon>
         <input matInput formControlName="assetName" placeholder="e.g. MOTOR-101">
         <mat-error *ngIf="addName.hasError('required')">Asset name is required</mat-error>
@@ -272,9 +414,20 @@
         <button mat-stroked-button type="button" (click)="closeAddAsset()">Cancel</button>
         <button mat-raised-button color="primary" type="submit" [disabled]="addingAsset">
           <mat-spinner *ngIf="addingAsset" diameter="18"></mat-spinner>
-          <span *ngIf="!addingAsset"><mat-icon>save</mat-icon> Save Asset</span>
+          <span *ngIf="!addingAsset"><mat-icon>save</mat-icon> Save asset</span>
         </button>
       </div>
     </form>
   </div>
 </div>
+
+<!-- ══ Edit Asset Dialog (separate component) ══ -->
+<app-asset-edit-dialog
+  *ngIf="editingAsset"
+  [asset]="editingAsset"
+  [threshold]="editingThreshold"
+  [canDelete]="canManageAssets"
+  (saved)="onAssetEdited($event)"
+  (deleted)="onAssetDeleted($event)"
+  (closed)="closeEditAsset()">
+</app-asset-edit-dialog>

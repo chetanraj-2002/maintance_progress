@@ -182,10 +182,18 @@ body {
   font-size: 0.72rem !important;
 }
 
-.mat-calendar-body-label { color: #6b7280 !important; }
-.mat-calendar-period-button { color: #374151 !important; }
+.mat-calendar-body-label {
+  color: #6b7280 !important;
+}
+
+.mat-calendar-period-button {
+  color: #374151 !important;
+}
+
 .mat-calendar-previous-button,
-.mat-calendar-next-button { color: #6b7280 !important; }
+.mat-calendar-next-button {
+  color: #6b7280 !important;
+}
 
 /* Snackbar — success */
 .snack-success .mdc-snackbar__surface {
@@ -222,26 +230,38 @@ body {
   font-weight: 700 !important;
   font-size: 0.9rem !important;
 }
+
 /* Progress Spinner */
 .mat-mdc-progress-spinner circle {
   stroke: #2563eb !important;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f8fafc; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
 
 /* Form field hints/errors */
-.mat-mdc-form-field-hint { color: #6b7280 !important; font-size: 0.7rem !important; }
-.mat-mdc-form-field-error { color: #dc2626 !important; font-size: 0.7rem !important; }
-/* Dashboard live simulation strip */
-.stat-chip.live mat-icon{color:#16a34a;animation:pulseLive 1.4s ease-in-out infinite}
-@keyframes pulseLive{0%,100%{opacity:.35;transform:scale(.86)}50%{opacity:1;transform:scale(1)}}
-.live-strip{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:#0f172a;color:#f8fafc;border-radius:8px;padding:16px 18px;box-shadow:0 8px 24px rgba(15,23,42,.12)}
-.live-main{display:flex;align-items:center;gap:12px;min-width:240px}.pulse-dot{width:12px;height:12px;border-radius:50%;background:#22c55e;flex:0 0 auto;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:liveRing 1.5s infinite}
-@keyframes liveRing{70%{box-shadow:0 0 0 10px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
-.live-title{display:block;font-size:.95rem;font-weight:800}.live-sub{display:block;font-size:.75rem;color:#94a3b8;margin-top:2px}.live-metrics{display:flex;gap:10px;flex-wrap:wrap}.live-metric{min-width:92px;border:1px solid rgba(148,163,184,.24);border-radius:8px;padding:8px 10px;background:rgba(255,255,255,.04)}
-.live-metric span{display:block;color:#94a3b8;font-size:.68rem;text-transform:uppercase;font-weight:700;letter-spacing:.06em}.live-metric strong{display:block;margin-top:2px;font-size:1rem;color:#f8fafc}.status-text.HEALTHY{color:#86efac!important}.status-text.WARNING{color:#fde68a!important}.status-text.NEEDS_ATTEN{color:#fdba74!important}.status-text.ALERT{color:#fca5a5!important}
-.alert-console{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 14px}.alert-console-title{display:flex;align-items:center;gap:8px;color:#c2410c;font-weight:800;font-size:.85rem}.alert-console-title mat-icon{color:#ea580c}.alert-items{display:flex;gap:8px;flex-wrap:wrap}.alert-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #fed7aa;border-radius:8px;padding:7px 9px;font-size:.76rem}.alert-asset{font-weight:800;color:#9a3412}.alert-issue{color:#475569}.alert-state{color:#dc2626;font-weight:800}
+.mat-mdc-form-field-hint {
+  color: #6b7280 !important;
+  font-size: 0.7rem !important;
+}
+
+.mat-mdc-form-field-error {
+  color: #dc2626 !important;
+  font-size: 0.7rem !important;
+}

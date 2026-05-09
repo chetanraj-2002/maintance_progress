@@ -29,7 +29,7 @@ function phoneValidator(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  styleUrls: ['../auth-side-shared.css', './register.component.css']
 })
 export class RegisterComponent {
   form: FormGroup;

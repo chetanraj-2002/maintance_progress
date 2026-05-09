@@ -1,60 +1,36 @@
-/* Reuses shared auth layout patterns — identical to login */
-.auth-root {
-  min-height: 100vh;
-  display: flex;
-}
+/* Register page — shared layout in pages/auth-side-shared.css */
 
 .auth-left {
-  width: 420px;
-  flex-shrink: 0;
   background: #1e40af;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  padding: 32px 40px;
 }
 
 .auth-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
   margin-bottom: 60px;
 }
 
-.auth-brand-icon { font-size: 28px; width: 28px; height: 28px; color: #fff; }
-.auth-brand-name { font-size: 1.1rem; font-weight: 700; }
-.auth-brand-sub {
-  font-size: 0.65rem;
-  font-weight: 700;
-  background: rgba(255,255,255,0.2);
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.06em;
+.auth-card {
+  max-width: 440px;
 }
 
-.auth-left-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.auth-header {
+  margin-bottom: 24px;
 }
 
 .auth-left-title {
   font-size: 1.7rem;
-  font-weight: 800;
   margin-bottom: 14px;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
 }
 
 .auth-left-desc {
   font-size: 0.9rem;
-  opacity: 0.85;
-  line-height: 1.7;
   margin-bottom: 28px;
 }
 
+.auth-submit-btn {
+  margin-top: 8px;
+}
+
+/* Benefits list (register-only) */
 .register-benefits {
   display: flex;
   flex-direction: column;
@@ -77,81 +53,6 @@
   height: 18px;
   flex-shrink: 0;
   margin-top: 1px;
-}
-
-.auth-right {
-  flex: 1;
-  background: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 440px;
-  background: #fff;
-  border-radius: 20px;
-  padding: 40px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-}
-
-.auth-header { margin-bottom: 24px; }
-
-.auth-title {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 6px;
-  letter-spacing: -0.02em;
-}
-
-.auth-subtitle { color: #64748b; font-size: 0.9rem; }
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.auth-field { width: 100%; }
-
-.auth-submit-btn {
-  height: 48px;
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 8px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.auth-footer {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 0.875rem;
-  color: #64748b;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-}
-
-.auth-link {
-  color: #2563eb;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.auth-link:hover { text-decoration: underline; }
-
-@media (max-width: 768px) {
-  .auth-left { display: none; }
 }
 
 /* Password strength checklist */

@@ -1,0 +1,89 @@
+<div class="edit-overlay" *ngIf="asset" (click)="cancel()">
+  <div class="edit-box" (click)="$event.stopPropagation()">
+
+    <div class="edit-header">
+      <h2 class="edit-title">
+        <mat-icon>edit</mat-icon>
+        Edit Asset
+      </h2>
+      <button mat-icon-button (click)="cancel()" aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p class="edit-sub">
+      Update name, location and threshold limits for
+      <strong>{{ asset.assetName }}</strong>.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="edit-form">
+
+      <div class="form-section">
+        <span class="section-label">Asset details</span>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Asset Name</mat-label>
+          <mat-icon matPrefix>precision_manufacturing</mat-icon>
+          <input matInput formControlName="assetName" placeholder="e.g. MOTOR-101">
+          <mat-error *ngIf="name.hasError('required')">Asset name is required</mat-error>
+          <mat-error *ngIf="name.hasError('minlength')">At least 2 characters</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Location</mat-label>
+          <mat-icon matPrefix>location_on</mat-icon>
+          <input matInput formControlName="location" placeholder="e.g. Plant A - Floor 2">
+          <mat-error *ngIf="loc.hasError('required')">Location is required</mat-error>
+          <mat-error *ngIf="loc.hasError('minlength')">At least 2 characters</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-section">
+        <span class="section-label">Threshold limits</span>
+
+        <div class="threshold-row">
+          <mat-form-field appearance="outline">
+            <mat-label>RMS Max (g)</mat-label>
+            <mat-icon matPrefix class="rms-icon">vibration</mat-icon>
+            <input matInput type="number" formControlName="rmsMax" step="0.1" min="0.1">
+            <mat-error *ngIf="rms.hasError('required')">Required</mat-error>
+            <mat-error *ngIf="rms.hasError('min')">Must be &gt; 0</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Temp Max (°C)</mat-label>
+            <mat-icon matPrefix class="temp-icon">thermostat</mat-icon>
+            <input matInput type="number" formControlName="tempMax" step="0.5" min="1">
+            <mat-error *ngIf="temp.hasError('required')">Required</mat-error>
+            <mat-error *ngIf="temp.hasError('min')">Must be &gt; 0</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="edit-actions">
+        <button mat-stroked-button color="warn" type="button"
+                *ngIf="canDelete"
+                [disabled]="deleting || saving"
+                (click)="remove()"
+                class="delete-btn">
+          <mat-icon>delete</mat-icon>
+          {{ deleting ? 'Deleting…' : 'Delete asset' }}
+        </button>
+
+        <span class="action-spacer"></span>
+
+        <button mat-stroked-button type="button" (click)="cancel()" [disabled]="saving || deleting">
+          Cancel
+        </button>
+
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="form.invalid || saving || deleting">
+          <mat-spinner *ngIf="saving" diameter="18"></mat-spinner>
+          <span *ngIf="!saving"><mat-icon>save</mat-icon> Save changes</span>
+          <span *ngIf="saving">Saving…</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
