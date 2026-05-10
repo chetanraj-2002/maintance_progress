@@ -133,14 +133,6 @@ http://localhost:4200
 
 ---
 
-## 🧪 Sample Data
-
-Database schema and sample data are automatically loaded using:
-- schema.sql  
-- data.sql  
-
----
-
 ## 🐞 Common Issues
 
 ### MySQL Access Denied
