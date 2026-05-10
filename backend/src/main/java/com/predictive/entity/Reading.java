@@ -2,6 +2,7 @@ package com.predictive.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "readings")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Reading {

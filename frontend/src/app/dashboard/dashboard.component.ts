@@ -33,6 +33,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ── Data ──
   allAssets:  Asset[]        = [];
   readings:   Reading[]      = [];
+  pagedReadings: Reading[]    = [];
   tickets:    Ticket[]       = [];
   openCounts: OpenCountDto[] = [];
   selectedAsset: Asset | null     = null;
@@ -41,8 +42,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ── Loading flags ──
   loadingAssets   = false;
   loadingReadings = false;
+  loadingReadingPage = false;
   lastLiveRefresh: Date | null = null;
   private liveSub?: Subscription;
+
+  readingStartDate: Date | null = null;
+  readingEndDate: Date | null = null;
+  readingFilterAssetId: number | null = null;
+  readingPageIndex = 0;
+  readingPageSize = 10;
+  readingTotal = 0;
+  readingPageSizeOptions = [5, 10, 25, 50];
 
   // ── Tickets pagination + show closed toggle ──
   ticketPageIndex = 0;
@@ -182,6 +192,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.selectedAsset?.id === deleted.id) {
       this.selectedAsset = null;
       this.readings = [];
+      this.pagedReadings = [];
+      this.readingFilterAssetId = null;
       this.threshold = null;
       this.sidebarCollapsed = false;
     }
@@ -194,6 +206,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onAssetSelected(asset: Asset): void {
     this.selectedAsset = asset;
     this.sidebarCollapsed = true;          // auto-minimise sidebar
+    this.resetReadingFilters();
+    this.readingFilterAssetId = asset.id;
     this.loadReadings();
     this.loadThreshold(asset.id);
   }
@@ -201,6 +215,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   closeAssetDetail(): void {
     this.selectedAsset = null;
     this.readings = [];
+    this.pagedReadings = [];
+    this.readingFilterAssetId = null;
     this.threshold = null;
     this.sidebarCollapsed = false;
   }
@@ -208,14 +224,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadReadings(): void {
     if (!this.selectedAsset) return;
     this.loadingReadings = true;
+    this.loadingReadingPage = true;
 
-    this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
+    const start = this.apiStartDate();
+    const end = this.apiEndDate();
+    const table$ = this.readingService.getReadings(
+      this.selectedAsset.id,
+      this.readingPageIndex,
+      this.readingPageSize,
+      start,
+      end
+    );
+    const chart$ = start && end
+      ? this.readingService.getReadingsByRange(this.selectedAsset.id, start, end)
+      : this.readingService.getRecentReadings(this.selectedAsset.id);
+
+    table$.subscribe({
+      next: (page) => {
+        this.pagedReadings = page.content;
+        this.readingTotal = page.totalElements;
+        this.loadingReadingPage = false;
+      },
+      error: () => {
+        this.loadingReadingPage = false;
+        this.snack.open('Failed to load readings table.', 'Close', { duration: 3000, panelClass: ['snack-error'] });
+      }
+    });
+
+    chart$.subscribe({
       next: (readings) => {
         this.readings = readings;
         this.loadingReadings = false;
         this.lastLiveRefresh = new Date();
       },
-      error: () => this.loadingReadings = false
+      error: () => {
+        this.loadingReadings = false;
+        this.snack.open('Failed to load chart readings.', 'Close', { duration: 3000, panelClass: ['snack-error'] });
+      }
     });
   }
 
@@ -228,6 +273,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   onThresholdUpdated(t: Threshold): void {
     this.threshold = t;
+  }
+
+  onReadingFilterChange(): void {
+    this.readingPageIndex = 0;
+    this.loadReadings();
+  }
+
+  onReadingAssetFilterChange(assetId: number): void {
+    const asset = this.allAssets.find(a => a.id === assetId);
+    if (!asset) return;
+
+    this.selectedAsset = asset;
+    this.readingFilterAssetId = asset.id;
+    this.readingPageIndex = 0;
+    this.readings = [];
+    this.pagedReadings = [];
+    this.loadThreshold(asset.id);
+    this.loadReadings();
+  }
+
+  clearReadingFilters(): void {
+    this.readingStartDate = null;
+    this.readingEndDate = null;
+    this.readingFilterAssetId = this.selectedAsset?.id ?? null;
+    this.readingPageIndex = 0;
+    this.loadReadings();
+  }
+
+  onReadingPage(event: PageEvent): void {
+    this.readingPageIndex = event.pageIndex;
+    this.readingPageSize = event.pageSize;
+    this.loadReadings();
   }
 
   // ── Tickets ─────────────────────────────────────────────────
@@ -337,12 +414,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadTickets();
     this.loadOpenCounts();
     if (this.selectedAsset) {
-      this.readingService.getRecentReadings(this.selectedAsset.id).subscribe({
-        next: (readings) => {
-          this.readings = readings;
-          this.lastLiveRefresh = new Date();
-        }
-      });
+      this.loadReadings();
     }
   }
 
@@ -387,4 +459,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get addName() { return this.addAssetForm.get('assetName')!; }
   get addLoc()  { return this.addAssetForm.get('location')!; }
+
+  get readingFiltersActive(): boolean {
+    return !!this.readingStartDate && !!this.readingEndDate;
+  }
+
+  private resetReadingFilters(): void {
+    this.readingStartDate = null;
+    this.readingEndDate = null;
+    this.readingPageIndex = 0;
+    this.readingTotal = 0;
+    this.pagedReadings = [];
+  }
+
+  private apiStartDate(): string | null {
+    if (!this.readingStartDate || !this.readingEndDate) return null;
+    return this.toLocalIso(this.readingStartDate, false);
+  }
+
+  private apiEndDate(): string | null {
+    if (!this.readingStartDate || !this.readingEndDate) return null;
+    return this.toLocalIso(this.readingEndDate, true);
+  }
+
+  private toLocalIso(date: Date, endOfDay: boolean): string {
+    const d = new Date(date);
+    if (endOfDay) {
+      d.setHours(23, 59, 59, 999);
+    } else {
+      d.setHours(0, 0, 0, 0);
+    }
+    const pad = (value: number, size = 2) => value.toString().padStart(size, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
 }

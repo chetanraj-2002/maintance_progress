@@ -1,12 +1,4 @@
-<!-- ════════════════════════════════════════════════════════════
-     Dashboard layout
-     ┌──────────────────────────────────────────────┐
-     │ Top navbar                                   │
-     ├────────────┬─────────────────────────────────┤
-     │ Sidebar    │ Main view (Home / Assets /      │
-     │ (collapse) │            Tickets)             │
-     └────────────┴─────────────────────────────────┘
-     ════════════════════════════════════════════════════════════ -->
+
 
 <!-- Top Navbar -->
 <mat-toolbar class="dash-navbar">
@@ -210,10 +202,47 @@
             <mat-card-header>
               <mat-icon mat-card-avatar class="card-icon">show_chart</mat-icon>
               <mat-card-title>Live sensor readings</mat-card-title>
-              <mat-card-subtitle>RMS &amp; Temperature — refreshing every 3s</mat-card-subtitle>
+              <mat-card-subtitle>
+                RMS &amp; Temperature {{ readingFiltersActive ? 'for selected dates' : '— refreshing every 3s' }}
+              </mat-card-subtitle>
             </mat-card-header>
 
             <mat-card-content>
+              <div class="reading-filter-bar">
+                <mat-form-field appearance="outline" class="asset-filter-field">
+                  <mat-label>Asset</mat-label>
+                  <mat-select [(ngModel)]="readingFilterAssetId"
+                              (selectionChange)="onReadingAssetFilterChange($event.value)">
+                    <mat-option *ngFor="let asset of allAssets" [value]="asset.id">
+                      {{ asset.assetName }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Start date</mat-label>
+                  <input matInput [matDatepicker]="startPicker"
+                         [(ngModel)]="readingStartDate"
+                         (dateChange)="onReadingFilterChange()">
+                  <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>End date</mat-label>
+                  <input matInput [matDatepicker]="endPicker"
+                         [(ngModel)]="readingEndDate"
+                         (dateChange)="onReadingFilterChange()">
+                  <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                </mat-form-field>
+
+                <button mat-stroked-button type="button" (click)="clearReadingFilters()"
+                        [disabled]="!readingStartDate && !readingEndDate">
+                  <mat-icon>filter_alt_off</mat-icon> Clear
+                </button>
+              </div>
+
               <div *ngIf="loadingReadings" class="loading-wrap">
                 <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
               </div>
@@ -224,6 +253,57 @@
                 [rmsMax]="rmsMax"
                 [tempMax]="tempMax">
               </app-reading-chart>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="dash-card detail-table">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="card-icon">table_chart</mat-icon>
+              <mat-card-title>Readings</mat-card-title>
+              <mat-card-subtitle>Paginated sensor history for {{ selectedAsset.assetName }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div *ngIf="loadingReadingPage" class="loading-wrap compact-loading">
+                <mat-progress-spinner mode="indeterminate" diameter="28"></mat-progress-spinner>
+              </div>
+
+              <div *ngIf="!loadingReadingPage && pagedReadings.length === 0" class="empty-state">
+                <mat-icon>sensors_off</mat-icon>
+                <p *ngIf="readingFiltersActive">No readings found in this date range.</p>
+                <p *ngIf="!readingFiltersActive">No readings yet. Ingest a payload or wait for simulation data.</p>
+              </div>
+
+              <div class="reading-table" *ngIf="!loadingReadingPage && pagedReadings.length > 0">
+                <div class="reading-row reading-head">
+                  <span>Timestamp</span>
+                  <span>Sensor</span>
+                  <span>RMS</span>
+                  <span>Temperature</span>
+                  <span>Status</span>
+                </div>
+
+                <div class="reading-row" *ngFor="let r of pagedReadings">
+                  <span>{{ r.timestamp | date: 'MMM d, y, HH:mm:ss' }}</span>
+                  <span>{{ r.sensor.id }} · {{ r.sensor.sensorType }}</span>
+                  <span [class.breach-value]="r.rms > rmsMax">{{ r.rms | number: '1.1-2' }} g</span>
+                  <span [class.breach-value]="r.temperature > tempMax">{{ r.temperature | number: '1.1-2' }} °C</span>
+                  <span>
+                    <span class="reading-status"
+                          [class.status-breach]="r.rms > rmsMax || r.temperature > tempMax">
+                      {{ r.rms > rmsMax || r.temperature > tempMax ? 'BREACH' : 'OK' }}
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <mat-paginator *ngIf="!loadingReadingPage && readingTotal > 0"
+                             [length]="readingTotal"
+                             [pageSize]="readingPageSize"
+                             [pageSizeOptions]="readingPageSizeOptions"
+                             [pageIndex]="readingPageIndex"
+                             (page)="onReadingPage($event)"
+                             aria-label="Reading pagination">
+              </mat-paginator>
             </mat-card-content>
           </mat-card>
         </div>

@@ -3,13 +3,17 @@ package com.predictive.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 public class AuthDtos {
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class RegisterRequest {
         @NotBlank
         private String fullName;
@@ -22,6 +26,9 @@ public class AuthDtos {
     }
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class LoginRequest {
         @NotBlank @Email
         private String email;
@@ -30,12 +37,18 @@ public class AuthDtos {
     }
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ForgotPasswordRequest {
         @NotBlank @Email
         private String email;
     }
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ResetPasswordRequest {
         @NotBlank
         private String token;
@@ -44,6 +57,7 @@ public class AuthDtos {
     }
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserDto {
@@ -55,6 +69,7 @@ public class AuthDtos {
     }
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AuthResponse {
@@ -64,6 +79,7 @@ public class AuthDtos {
     }
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MessageResponse {
@@ -71,6 +87,7 @@ public class AuthDtos {
     }
 
     @Data
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ResetTokenResponse {

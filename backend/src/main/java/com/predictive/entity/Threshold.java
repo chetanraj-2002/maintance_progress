@@ -2,6 +2,7 @@ package com.predictive.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 @Entity
 @Table(name = "thresholds")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Threshold {

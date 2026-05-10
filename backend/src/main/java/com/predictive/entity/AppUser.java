@@ -2,6 +2,7 @@ package com.predictive.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
         @UniqueConstraint(name = "uk_app_users_email", columnNames = "email")
 })
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppUser {
@@ -34,6 +36,7 @@ public class AppUser {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
+    @Builder.Default
     private Role role = Role.USER;
 
     @Column(name = "reset_token", length = 120)

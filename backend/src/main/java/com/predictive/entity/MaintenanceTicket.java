@@ -2,6 +2,7 @@ package com.predictive.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "maintenance_tickets")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MaintenanceTicket {
@@ -29,6 +31,7 @@ public class MaintenanceTicket {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @Builder.Default
     private TicketStatus status = TicketStatus.OPEN;
 
     @Column(name = "created_at", nullable = false)

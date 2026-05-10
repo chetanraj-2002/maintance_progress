@@ -1,6 +1,7 @@
 package com.predictive.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 @Entity
 @Table(name = "assets")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Asset {
@@ -24,6 +26,7 @@ public class Asset {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @Builder.Default
     private AssetStatus status = AssetStatus.HEALTHY;
 
     public enum AssetStatus {

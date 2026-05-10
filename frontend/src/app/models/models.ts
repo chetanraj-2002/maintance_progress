@@ -20,6 +20,14 @@ export interface Reading {
   timestamp: string;
 }
 
+export interface ReadingPage {
+  content: Reading[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 // src/app/models/threshold.model.ts
 export interface Threshold {
   id: number;

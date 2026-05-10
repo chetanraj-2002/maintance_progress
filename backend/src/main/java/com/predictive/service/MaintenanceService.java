@@ -22,7 +22,7 @@ public class MaintenanceService {
     @Autowired private ReadingRepository readingRepository;
 
     @Transactional
-    public void evaluateThresholds(Long assetId, double rms, double temperature) {
+    public void evaluateThreshold(Long assetId, double rms, double temperature) {
         Optional<Threshold> thresholdOpt = thresholdRepository.findByAssetId(assetId);
         if (thresholdOpt.isEmpty()) return;
 

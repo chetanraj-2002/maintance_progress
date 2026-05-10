@@ -111,6 +111,7 @@
   height: 48px;
   font-size: 1rem;
   font-weight: 600;
+
 }
 
 .hero-btn-secondary {
@@ -192,6 +193,7 @@
   border-radius: 16px !important;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
   transition: box-shadow 0.2s, transform 0.2s;
+
 }
 
 .feature-card:hover {
