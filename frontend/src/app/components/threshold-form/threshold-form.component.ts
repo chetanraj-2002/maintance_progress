@@ -50,8 +50,8 @@ export class ThresholdFormComponent implements OnChanges {
     this.saving = true;
     const payload = {
       assetId: this.selectedAssetId,
-      rmsMax: this.form.value.rmsMax,
-      tempMax: this.form.value.tempMax
+      rmsMax: Number(this.form.value.rmsMax),
+      tempMax: Number(this.form.value.tempMax)
     };
 
     this.thresholdService.saveOrUpdate(payload).subscribe({
@@ -65,11 +65,13 @@ export class ThresholdFormComponent implements OnChanges {
       },
       error: (err) => {
         this.saving = false;
-        this.snackBar.open('Failed to update thresholds', 'Close', {
-          duration: 3000,
+        const serverMsg = err?.error?.message || err?.error?.error || err?.message;
+        const detail = serverMsg ? ` (${serverMsg})` : '';
+        this.snackBar.open(`Failed to update thresholds${detail}`, 'Close', {
+          duration: 5000,
           panelClass: ['snack-error']
         });
-        console.error(err);
+        console.error('Threshold update failed', err);
       }
     });
   }

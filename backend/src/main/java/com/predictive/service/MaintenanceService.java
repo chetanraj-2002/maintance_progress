@@ -152,8 +152,7 @@ public class MaintenanceService {
             threshold.setTempMax(dto.getTempMax());
         } else {
             threshold = new Threshold();
-            long maxId = thresholdRepository.count() + 1;
-            threshold.setId(maxId);
+            threshold.setId(thresholdRepository.findMaxId() + 1);
             threshold.setAsset(asset);
             threshold.setRmsMax(dto.getRmsMax());
             threshold.setTempMax(dto.getTempMax());

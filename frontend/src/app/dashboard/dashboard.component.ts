@@ -221,10 +221,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.sidebarCollapsed = false;
   }
 
-  loadReadings(): void {
+  loadReadings(silent = false): void {
     if (!this.selectedAsset) return;
-    this.loadingReadings = true;
-    this.loadingReadingPage = true;
+    if (!silent) {
+      this.loadingReadings = true;
+      this.loadingReadingPage = true;
+    }
 
     const start = this.apiStartDate();
     const end = this.apiEndDate();
@@ -247,7 +249,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loadingReadingPage = false;
-        this.snack.open('Failed to load readings table.', 'Close', { duration: 3000, panelClass: ['snack-error'] });
+        if (!silent) {
+          this.snack.open('Failed to load readings table.', 'Close', { duration: 3000, panelClass: ['snack-error'] });
+        }
       }
     });
 
@@ -259,7 +263,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loadingReadings = false;
-        this.snack.open('Failed to load chart readings.', 'Close', { duration: 3000, panelClass: ['snack-error'] });
+        if (!silent) {
+          this.snack.open('Failed to load chart readings.', 'Close', { duration: 3000, panelClass: ['snack-error'] });
+        }
       }
     });
   }
@@ -414,7 +420,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadTickets();
     this.loadOpenCounts();
     if (this.selectedAsset) {
-      this.loadReadings();
+      this.loadReadings(true);
     }
   }
 

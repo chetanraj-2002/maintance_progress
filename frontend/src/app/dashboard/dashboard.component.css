@@ -472,9 +472,14 @@
   align-items: start;
 }
 
-.detail-side {
+.detail-header {
   position: sticky;
-  top: 84px;
+  top: 64px;
+  z-index: 50;
+  background: #f1f5f9;
+  padding: 12px 0;
+  margin: -12px 0 0;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .detail-table {
@@ -559,9 +564,6 @@
 @media (max-width: 1100px) {
   .detail-grid {
     grid-template-columns: 1fr;
-  }
-  .detail-side {
-    position: static;
   }
 }
 
